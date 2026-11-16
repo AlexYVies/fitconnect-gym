@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitConnect - Mi Cuenta</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',system-ui,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh}
+        .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem}
+        .login-card{background:#1e293b;border:1px solid #334155;border-radius:1rem;padding:2.5rem;width:100%;max-width:400px}
+        .login-card h1{font-size:1.6rem;font-weight:700;text-align:center;margin-bottom:0.3rem;background:linear-gradient(135deg,#14b8a6,#0d9488);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .login-card .sub{text-align:center;color:#64748b;font-size:0.85rem;margin-bottom:2rem}
+        .app{display:none;max-width:520px;margin:0 auto;padding:1rem 1rem 6rem}
+        .top-bar{display:flex;justify-content:space-between;align-items:center;padding:1rem 0}
+        .top-bar h2{font-size:1.1rem;font-weight:600;color:#94a3b8}
+        .btn-logout{background:none;border:none;color:#64748b;font-size:0.8rem;cursor:pointer}
+        .card{background:#1e293b;border:1px solid #334155;border-radius:0.75rem;padding:1.25rem;margin-bottom:1rem}
+        .card h3{font-size:0.75rem;text-transform:uppercase;letter-spacing:0.08em;color:#64748b;margin-bottom:0.75rem}
+        .status-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem}
+        .status-row .label{color:#94a3b8;font-size:0.85rem}
+        .status-row .val{font-weight:600;font-size:0.9rem}
+        .badge{padding:0.2rem 0.7rem;border-radius:2rem;font-size:0.75rem;font-weight:600}
+        .badge-ok{background:rgba(16,185,129,0.15);color:#34d399;border:1px solid rgba(16,185,129,0.3)}
+        .badge-warn{background:rgba(245,158,11,0.15);color:#fbbf24;border:1px solid rgba(245,158,11,0.3)}
+        .badge-bad{background:rgba(239,68,68,0.15);color:#fca5a5;border:1px solid rgba(239,68,68,0.3)}
+        .aviso{border-radius:0.75rem;padding:0.9rem 1rem;margin-bottom:1rem;font-size:0.85rem;display:none}
+        .aviso.warn{background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.35);color:#fbbf24}
+        .aviso.bad{background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.35);color:#fca5a5}
+        .aviso a{color:inherit;font-weight:700;text-decoration:underline;cursor:pointer}
+        label{display:block;font-size:0.8rem;color:#94a3b8;margin-bottom:0.3rem;margin-top:0.75rem}
+        input,select{width:100%;padding:0.65rem 0.75rem;background:#0f172a;border:1px solid #334155;border-radius:0.5rem;color:#e2e8f0;font-size:0.9rem;font-family:inherit}
+        input:focus,select:focus{outline:none;border-color:#0d9488}
+        input:disabled,select:disabled{opacity:0.5}
+        .btn{width:100%;padding:0.7rem;border:none;border-radius:0.5rem;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:inherit;margin-top:0.75rem;transition:opacity 0.2s}
+        .btn:disabled{opacity:0.5;cursor:not-allowed}
+        .btn-primary{background:linear-gradient(135deg,#0d9488,#14b8a6);color:#fff}
+        .btn-secondary{background:#334155;color:#e2e8f0}
+        .history-item{display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #1e293b;font-size:0.85rem}
+        .history-item:last-child{border:none}
+        .history-date{color:#64748b}
+        .tab-bar{display:flex;gap:0.25rem;margin-bottom:1rem;background:#0f172a;border-radius:0.5rem;padding:0.25rem}
+        .tab{flex:1;text-align:center;padding:0.5rem;border-radius:0.4rem;font-size:0.8rem;font-weight:500;color:#64748b;cursor:pointer;border:none;background:none;font-family:inherit}
+        .tab.active{background:#1e293b;color:#14b8a6}
+        .section{display:none}
+        .section.active{display:block}
+        .mem-option{border:1px solid #334155;border-radius:0.5rem;padding:1rem;margin-bottom:0.5rem;cursor:pointer;transition:border-color 0.2s}
+        .mem-option.selected{border-color:#14b8a6;background:rgba(13,148,136,0.08)}
+        .mem-option .mem-name{font-weight:600;font-size:0.95rem}
+        .mem-option .mem-detail{color:#64748b;font-size:0.8rem;margin-top:0.2rem}
+        .mem-option .mem-price{color:#14b8a6;font-weight:700;font-size:1.1rem;float:right}
+        .toast{position:fixed;top:1rem;left:50%;transform:translateX(-50%);padding:0.6rem 1.5rem;border-radius:0.5rem;font-size:0.85rem;font-weight:500;z-index:100;animation:fadeIn 0.3s}
+        .toast-ok{background:#059669;color:#fff}
+        .toast-err{background:#dc2626;color:#fff}
+        @keyframes fadeIn{from{opacity:0;transform:translateX(-50%) translateY(-10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+        .note{font-size:0.8rem;color:#64748b;margin-top:0.5rem}
+        .pw-ok{color:#34d399;font-size:0.85rem;margin-top:0.5rem;display:none}
+    </style>
+</head>
+<body>
+    <div class="login-wrap" id="loginWrap">
+        <div class="login-card">
+            <h1>FitConnect</h1>
+            <p class="sub">Portal de Clientes</p>
+            <form onsubmit="doLogin(event)">
+                <label>Correo electronico</label>
+                <input type="email" id="loginEmail" required placeholder="tu@email.com">
+                <label>Contrasena</label>
+                <input type="password" id="loginPass" required placeholder="Tu contrasena">
+                <button type="submit" class="btn btn-primary" id="btnLogin">Iniciar Sesion</button>
+            </form>
+            <p style="text-align:center;margin-top:1rem;font-size:0.75rem;color:#475569">Tu contrasena inicial es la parte antes del @ de tu correo</p>
+        </div>
+    </div>
+
+    <div class="app" id="appWrap">
+        <div class="top-bar"><h2 id="welcomeUser">Hola, -</h2><button class="btn-logout" onclick="logout()">Cerrar sesion</button></div>
+        <div class="tab-bar">
+            <button class="tab active" onclick="switchTab('inicio')">Inicio</button>
+            <button class="tab" onclick="switchTab('renovar')">Renovar</button>
+            <button class="tab" onclick="switchTab('cuenta')">Mi cuenta</button>
+        </div>
+
+        <div class="section active" id="secInicio">
+            <div class="aviso" id="avisoVenc"></div>
+            <div class="card"><h3>Mi Membresia</h3>
+                <div class="status-row"><span class="label">Estado</span><span id="memEstado"><span class="badge badge-bad">Sin membresia</span></span></div>
+                <div class="status-row"><span class="label">Plan</span><span class="val" id="memPlan">-</span></div>
+                <div class="status-row"><span class="label">Vence</span><span class="val" id="memVence">-</span></div>
+                <div class="status-row"><span class="label">Dias restantes</span><span class="val" id="memDias">-</span></div>
+            </div>
+            <div class="card"><h3>Ultimas asistencias</h3><div id="historialList"><p style="color:#475569;font-size:0.85rem">Cargando...</p></div></div>
+            <div class="card"><h3>Historial de pagos</h3><div id="pagosList"><p style="color:#475569;font-size:0.85rem">Cargando...</p></div></div>
+        </div>
+
+        <div class="section" id="secRenovar">
+            <div class="card"><h3>Elegir membresia</h3><div id="memOptions"><p style="color:#475569;font-size:0.85rem">Cargando planes...</p></div></div>
+            <div class="card" id="payCard" style="display:none">
+                <h3>Pago con tarjeta</h3>
+                <label>Numero de tarjeta</label><input type="text" id="payNumero" placeholder="1234 5678 9012 3456" maxlength="19">
+                <div style="display:flex;gap:0.75rem"><div style="flex:1"><label>Vencimiento</label><input type="text" id="payVenc" placeholder="MM/AA" maxlength="5"></div><div style="flex:1"><label>CVV</label><input type="text" id="payCvv" placeholder="123" maxlength="4"></div></div>
+                <label>Nombre en la tarjeta</label><input type="text" id="payNombre" placeholder="NOMBRE COMPLETO">
+                <button class="btn btn-primary" onclick="procesarPago()" id="btnPagar">Pagar</button>
+                <p style="text-align:center;margin-top:0.5rem;font-size:0.7rem;color:#475569">Pago seguro simulado (demo)</p>
+            </div>
+        </div>
+
+        <div class="section" id="secCuenta">
+            <div class="card"><h3>Mis datos</h3>
+                <div class="status-row"><span class="label">Nombre</span><span class="val" id="miNombre">-</span></div>
+                <div class="status-row"><span class="label">Email</span><span class="val" id="miEmail">-</span></div>
+                <div class="status-row"><span class="label">Telefono</span><span class="val" id="miTel">-</span></div>
+                <div class="status-row"><span class="label">Sucursal</span><span class="val" id="miSucursal">-</span></div>
+                <div class="status-row"><span class="label">NFC</span><span class="val" id="miNfc">-</span></div>
+            </div>
+            <div class="card"><h3>Cambiar de sucursal</h3>
+                <div id="sucursalCambio">
+                    <label>Sucursal</label><select id="selSucursal"></select>
+                    <button class="btn btn-secondary" onclick="cambiarSucursal()">Cambiar sucursal</button>
+                </div>
+                <p class="note" id="sucursalNota"></p>
+            </div>
+            <div class="card"><h3>Cambiar contrasena</h3>
+                <label>Contrasena actual</label><input type="password" id="pwActual">
+                <label>Nueva contrasena</label><input type="password" id="pwNueva">
+                <label>Confirmar nueva contrasena</label><input type="password" id="pwConfirm">
+                <button class="btn btn-secondary" onclick="cambiarPassword()">Cambiar contrasena</button>
+                <p class="pw-ok" id="pwOk">Contrasena actualizada correctamente</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = '/api';
+        let session = null;
+        let membresiasCache = [];
+        let sucursalesCache = [];
+        let selectedMem = null;
+
+        function authHeaders() { return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (session && session.token || '') }; }
+        function toast(msg, ok) { const d = document.createElement('div'); d.className = 'toast ' + (ok ? 'toast-ok' : 'toast-err'); d.textContent = msg; document.body.appendChild(d); setTimeout(() => d.remove(), 3000); }
+        function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+        function fmt$(n) { return '$' + Number(n || 0).toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 2 }); }
+
+        // ===== Estado de membresia (vigencia acumulada) =====
+        function memInfo() {
+            const vig = session.vigencia ? new Date(session.vigencia) : null;
+            const today = new Date(); today.setHours(0, 0, 0, 0);
+            const vigente = !!vig && vig >= today;
+            const dias = vig ? Math.round((vig - today) / 86400000) : 0;
+            return { vig, vigente, dias, plan: session.membresia };
+        }
+
+        // ===== LOGIN =====
+        async function doLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+            const pass = document.getElementById('loginPass').value;
+            document.getElementById('btnLogin').disabled = true;
+            try {
+                const r = await fetch(`${API}/auth/login-cliente`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password: pass }) });
+                const d = await r.json();
+                if (!r.ok) { toast(d.error || 'Credenciales incorrectas', false); return; }
+                session = d;
+                localStorage.setItem('fitcli_session', JSON.stringify(d));
+                showApp();
+            } catch (err) { toast('Error de conexion', false); }
+            finally { document.getElementById('btnLogin').disabled = false; }
+        }
+        function logout() { localStorage.removeItem('fitcli_session'); session = null; document.getElementById('loginWrap').style.display = ''; document.getElementById('appWrap').style.display = 'none'; }
+        function tryAutoLogin() { const s = localStorage.getItem('fitcli_session'); if (!s) return; try { session = JSON.parse(s); if (session && session.token) showApp(); } catch (e) {} }
+
+        function showApp() {
+            document.getElementById('loginWrap').style.display = 'none';
+            document.getElementById('appWrap').style.display = 'block';
+            document.getElementById('welcomeUser').textContent = 'Hola, ' + (session.nombre || '').split(' ')[0];
+            renderMemStatus();
+            loadHistorial();
+            loadPagos();
+            loadMembresias();
+            loadCuenta();
+        }
+
+        function switchTab(name) {
+            const ids = ['inicio', 'renovar', 'cuenta'];
+            document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', ids[i] === name));
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById('sec' + name.charAt(0).toUpperCase() + name.slice(1)).classList.add('active');
+        }
+
+        // ===== INICIO =====
+        function renderMemStatus() {
+            const info = memInfo();
+            const aviso = document.getElementById('avisoVenc');
+            if (!info.vig) {
+                document.getElementById('memEstado').innerHTML = '<span class="badge badge-bad">Sin membresia</span>';
+                document.getElementById('memPlan').textContent = '-';
+                document.getElementById('memVence').textContent = '-';
+                document.getElementById('memDias').textContent = '-';
+                aviso.className = 'aviso bad'; aviso.innerHTML = 'No tienes una membresia activa. <a onclick="switchTab(\'renovar\')">Adquirir un plan</a>'; aviso.style.display = 'block';
+            } else if (!info.vigente) {
+                document.getElementById('memEstado').innerHTML = '<span class="badge badge-bad">Vencida</span>';
+                document.getElementById('memPlan').textContent = info.plan || '-';
+                document.getElementById('memVence').textContent = info.vig.toLocaleDateString('es-MX');
+                document.getElementById('memDias').textContent = 'Vencida';
+                aviso.className = 'aviso bad'; aviso.innerHTML = 'Tu membresia esta <b>vencida</b>. <a onclick="switchTab(\'renovar\')">Renovar ahora</a>'; aviso.style.display = 'block';
+            } else {
+                const porVencer = info.dias <= 5;
+                document.getElementById('memEstado').innerHTML = `<span class="badge ${porVencer ? 'badge-warn' : 'badge-ok'}">${porVencer ? 'Por vencer' : 'Activa'}</span>`;
+                document.getElementById('memPlan').textContent = info.plan || '-';
+                document.getElementById('memVence').textContent = info.vig.toLocaleDateString('es-MX');
+                document.getElementById('memDias').textContent = info.dias + ' dias';
+                if (porVencer) { aviso.className = 'aviso warn'; aviso.innerHTML = `Tu membresia vence en <b>${info.dias} dia(s)</b>. <a onclick="switchTab('renovar')">Renovar</a>`; aviso.style.display = 'block'; }
+                else { aviso.style.display = 'none'; }
+            }
+        }
+
+        async function loadHistorial() {
+            try {
+                const d = await (await fetch(`${API}/asistencias`, { headers: authHeaders() })).json();
+                const items = (d.items || []).slice(0, 8);
+                const el = document.getElementById('historialList');
+                el.innerHTML = items.length ? items.map(a => { const dt = new Date(a.fechaHora); return `<div class="history-item"><span>${dt.toLocaleDateString('es-MX')} ${dt.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}</span><span class="history-date">${esc(a.metodo || 'manual')}</span></div>`; }).join('') : '<p style="color:#475569;font-size:0.85rem">Sin asistencias registradas</p>';
+            } catch (e) {}
+        }
+
+        async function loadPagos() {
+            try {
+                const d = await (await fetch(`${API}/pagos`, { headers: authHeaders() })).json();
+                const items = (d.items || []).slice(0, 8);
+                const el = document.getElementById('pagosList');
+                el.innerHTML = items.length ? items.map(p => `<div class="history-item"><span>${new Date(p.fecha).toLocaleDateString('es-MX')} — ${esc(p.membresia || '')}</span><span class="history-date">${fmt$(p.monto)} · ${esc(p.metodo || '')}</span></div>`).join('') : '<p style="color:#475569;font-size:0.85rem">Sin pagos registrados</p>';
+            } catch (e) {}
+        }
+
+        // ===== RENOVAR =====
+        async function loadMembresias() {
+            try {
+                const d = await (await fetch(`${API}/membresias`, { headers: authHeaders() })).json();
+                membresiasCache = (d.items || []).filter(m => m.estatus === 'activa');
+                const el = document.getElementById('memOptions');
+                el.innerHTML = membresiasCache.length ? membresiasCache.map((m, i) => `<div class="mem-option" onclick="selectMem(${i})" id="memOpt${i}"><span class="mem-price">${fmt$(m.precio)}</span><div class="mem-name">${esc(m.nombre)}</div><div class="mem-detail">${m.duracionDias} dias${m.descripcion ? ' — ' + esc(m.descripcion) : ''}</div></div>`).join('') : '<p style="color:#475569;font-size:0.85rem">No hay planes disponibles</p>';
+            } catch (e) {}
+        }
+        function selectMem(i) { selectedMem = membresiasCache[i]; document.querySelectorAll('.mem-option').forEach((o, j) => o.classList.toggle('selected', j === i)); document.getElementById('payCard').style.display = ''; }
+
+        async function procesarPago() {
+            if (!selectedMem) { toast('Selecciona un plan', false); return; }
+            const num = document.getElementById('payNumero').value.replace(/\s/g, '');
+            const venc = document.getElementById('payVenc').value;
+            const cvv = document.getElementById('payCvv').value;
+            if (num.length < 15 || !venc || cvv.length < 3) { toast('Completa los datos de la tarjeta', false); return; }
+            document.getElementById('btnPagar').disabled = true;
+            document.getElementById('btnPagar').textContent = 'Procesando...';
+            try {
+                await new Promise(r => setTimeout(r, 1200));
+                const r = await fetch(`${API}/pagos/cliente`, { method: 'POST', headers: authHeaders(), body: JSON.stringify({ idMembresia: selectedMem.id }) });
+                const d = await r.json();
+                if (!r.ok) { toast(d.error || 'Error al procesar el pago', false); return; }
+                session.vigencia = d.vigencia; session.membresia = d.membresia;
+                localStorage.setItem('fitcli_session', JSON.stringify(session));
+                ['payNumero', 'payVenc', 'payCvv', 'payNombre'].forEach(id => document.getElementById(id).value = '');
+                document.getElementById('payCard').style.display = 'none';
+                document.querySelectorAll('.mem-option').forEach(o => o.classList.remove('selected'));
+                selectedMem = null;
+                toast('Pago exitoso — membresia activada', true);
+                renderMemStatus(); loadPagos(); loadCuenta();
+                switchTab('inicio');
+            } catch (e) { toast('Error al procesar el pago', false); }
+            finally { document.getElementById('btnPagar').disabled = false; document.getElementById('btnPagar').textContent = 'Pagar'; }
+        }
+
+        // ===== MI CUENTA =====
+        async function loadCuenta() {
+            document.getElementById('miNombre').textContent = session.nombre || '-';
+            document.getElementById('miEmail').textContent = session.email || '-';
+            document.getElementById('miTel').textContent = session.telefono || '-';
+            document.getElementById('miSucursal').textContent = session.sucursal || '-';
+            document.getElementById('miNfc').textContent = session.uidNfc || 'Sin asignar';
+
+            // Cambiar de sucursal: solo si la membresia esta vencida
+            const info = memInfo();
+            const cont = document.getElementById('sucursalCambio');
+            const nota = document.getElementById('sucursalNota');
+            if (info.vigente) {
+                cont.style.display = 'none';
+                nota.textContent = 'Solo puedes cambiar de sucursal cuando tu membresia este vencida.';
+            } else {
+                cont.style.display = '';
+                nota.textContent = '';
+                try {
+                    sucursalesCache = await (await fetch(`${API}/sucursales`, { headers: authHeaders() })).json().then(r => r.items || []);
+                    const sel = document.getElementById('selSucursal');
+                    sel.innerHTML = sucursalesCache.map(s => `<option value="${s.id}">${esc(s.nombre)}</option>`).join('');
+                    sel.value = session.idSucursal || '';
+                } catch (e) {}
+            }
+        }
+
+        async function cambiarSucursal() {
+            const idSuc = Number(document.getElementById('selSucursal').value);
+            if (!idSuc) return;
+            try {
+                const r = await fetch(`${API}/clientes/mi-sucursal`, { method: 'PUT', headers: authHeaders(), body: JSON.stringify({ idSucursal: idSuc }) });
+                const d = await r.json();
+                if (!r.ok) { toast(d.error || 'No se pudo cambiar', false); return; }
+                session.idSucursal = d.idSucursal; session.sucursal = d.sucursal;
+                localStorage.setItem('fitcli_session', JSON.stringify(session));
+                toast('Sucursal actualizada a ' + d.sucursal, true);
+                loadCuenta();
+            } catch (e) { toast('Error al cambiar de sucursal', false); }
+        }
+
+        async function cambiarPassword() {
+            const actual = document.getElementById('pwActual').value;
+            const nueva = document.getElementById('pwNueva').value;
+            const confirm2 = document.getElementById('pwConfirm').value;
+            if (!actual || !nueva) { toast('Completa todos los campos', false); return; }
+            if (nueva.length < 3) { toast('La contrasena debe tener al menos 3 caracteres', false); return; }
+            if (nueva !== confirm2) { toast('Las contrasenas no coinciden', false); return; }
+            try {
+                const r = await fetch(`${API}/auth/cambio-password-cliente`, { method: 'POST', headers: authHeaders(), body: JSON.stringify({ passwordActual: actual, passwordNueva: nueva }) });
+                const d = await r.json();
+                if (!r.ok) { toast(d.error || 'Error al cambiar contrasena', false); return; }
+                ['pwActual', 'pwNueva', 'pwConfirm'].forEach(id => document.getElementById(id).value = '');
+                const ok = document.getElementById('pwOk'); ok.style.display = 'block'; setTimeout(() => ok.style.display = 'none', 3000);
+                toast('Contrasena actualizada', true);
+            } catch (e) { toast('Error al cambiar contrasena', false); }
+        }
+
+        tryAutoLogin();
+    </script>
+</body>
+</html>

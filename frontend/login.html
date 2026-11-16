@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitConnect Pro - Login</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0d9488 100%)}
+        .login-box{background:#fff;border-radius:1rem;padding:2.5rem;width:100%;max-width:400px;box-shadow:0 25px 50px rgba(0,0,0,0.3)}
+        .login-box h1{color:#1e293b;font-size:1.5rem;margin-bottom:0.25rem}
+        .login-box p{color:#64748b;font-size:0.85rem;margin-bottom:1.5rem}
+        .form-group{margin-bottom:1rem}
+        .form-group label{display:block;font-size:0.8rem;color:#64748b;margin-bottom:0.3rem;font-weight:500}
+        .form-group input{width:100%;padding:0.7rem 0.75rem;border:1px solid #e2e8f0;border-radius:0.5rem;font-size:0.95rem;outline:none;transition:border-color 0.2s}
+        .form-group input:focus{border-color:#0d9488;box-shadow:0 0 0 3px rgba(13,148,136,0.1)}
+        .btn-login{width:100%;padding:0.75rem;background:#0d9488;color:#fff;border:none;border-radius:0.5rem;font-size:1rem;font-weight:600;cursor:pointer;transition:background 0.2s;margin-top:0.5rem}
+        .btn-login:hover{background:#0f766e}
+        .error-msg{color:#ef4444;font-size:0.85rem;margin-top:0.75rem;display:none;text-align:center}
+        .logo{text-align:center;margin-bottom:1.5rem}
+        .logo-icon{width:60px;height:60px;background:#0d9488;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:1.5rem;font-weight:700}
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <div class="logo"><div class="logo-icon">FA</div></div>
+        <h1>FitConnect Pro</h1>
+        <p>Sistema de Administracion de Gimnasio</p>
+        <form id="loginForm" onsubmit="doLogin(event)">
+            <div class="form-group">
+                <label>Correo electronico</label>
+                <input type="email" id="email" required placeholder="usuario@fitconnect.com">
+            </div>
+            <div class="form-group">
+                <label>Contrasena</label>
+                <input type="password" id="password" required placeholder="Tu contrasena">
+            </div>
+            <button type="submit" class="btn-login">Iniciar Sesion</button>
+            <p class="error-msg" id="errorMsg"></p>
+        </form>
+    </div>
+    <script>
+    const API = '/api';
+
+    async function doLogin(e) {
+        e.preventDefault();
+        const errEl = document.getElementById('errorMsg');
+        errEl.style.display = 'none';
+        try {
+            const r = await fetch(`${API}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: document.getElementById('email').value.trim(),
+                    password: document.getElementById('password').value.trim()
+                })
+            });
+            const d = await r.json();
+            if (!r.ok) { errEl.textContent = d.error || 'Credenciales incorrectas'; errEl.style.display = 'block'; return; }
+            localStorage.setItem('fitconnect_session', JSON.stringify(d));
+            window.location.href = d.rol === 'kiosko' ? 'entrada.html' : 'index.html';
+        } catch (e) {
+            errEl.textContent = 'Error de conexion al servidor';
+            errEl.style.display = 'block';
+        }
+    }
+
+    (function () {
+        const s = JSON.parse(localStorage.getItem('fitconnect_session') || 'null');
+        if (s && s.token) window.location.href = s.rol === 'kiosko' ? 'entrada.html' : 'index.html';
+    })();
+    </script>
+</body>
+</html>

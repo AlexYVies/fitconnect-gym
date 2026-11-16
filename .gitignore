@@ -1,0 +1,21 @@
+# .NET / Visual Studio
+**/bin/
+**/obj/
+.vs/
+*.user
+*.suo
+publish/
+
+# Python / MicroPython
+**/__pycache__/
+*.py[cod]
+
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+
+# OS
+Thumbs.db
+.DS_Store
+*.log

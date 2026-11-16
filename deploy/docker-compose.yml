@@ -1,0 +1,72 @@
+services:
+  # ---------- SQL Server ----------
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: fitconnect-db
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "${SA_PASSWORD}"
+      MSSQL_PID: "Developer"
+    # Sin 'ports': la BD NO se expone al host (solo la usa el api por la red interna).
+    volumes:
+      - mssql-data:/var/opt/mssql
+    restart: unless-stopped
+
+  # ---------- Inicializacion de la BD (corre una vez) ----------
+  db-init:
+    image: mcr.microsoft.com/mssql-tools:latest
+    depends_on:
+      - db
+    environment:
+      SA_PASSWORD: "${SA_PASSWORD}"
+    volumes:
+      - ../sql/FitConnectDB.sql:/script.sql:ro
+      - ./db-init/init.sh:/init.sh:ro
+    entrypoint: ["/bin/bash", "/init.sh"]
+    restart: "no"
+
+  # ---------- Broker MQTT (comunicacion real con el ESP32) ----------
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: fitconnect-mqtt
+    volumes:
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+    ports:
+      - "1883:1883"          # el ESP32 se conecta aqui (puerto MQTT necesario)
+    restart: unless-stopped
+
+  # ---------- Aplicacion FitConnect ----------
+  api:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    container_name: fitconnect-api
+    depends_on:
+      db-init:
+        condition: service_completed_successfully
+      mosquitto:
+        condition: service_started
+    environment:
+      ConnectionStrings__DefaultConnection: "Server=db,1433;Database=FitConnectDB;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;"
+      Jwt__Key: "${JWT_KEY}"
+      Mqtt__Host: "mosquitto"
+      Mqtt__Port: "1883"
+    # Sin 'ports': Kestrel (8080) NO se expone al host. Solo Nginx habla con el.
+    expose:
+      - "8080"
+    restart: unless-stopped
+
+  # ---------- Nginx (proxy inverso) ----------
+  nginx:
+    image: nginx:alpine
+    container_name: fitconnect-nginx
+    depends_on:
+      - api
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "80:80"              # unico punto de entrada web (http://IP-de-la-VM/login.html)
+    restart: unless-stopped
+
+volumes:
+  mssql-data:

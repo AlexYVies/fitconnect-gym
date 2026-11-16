@@ -1,0 +1,199 @@
+=============================================
+ FitConnect Pro - Guia de Instalacion
+ C#/.NET 8 + SQL Server + IIS
+=============================================
+
+REQUISITOS:
+- Windows 10/11 o Windows Server
+- SQL Server 2019+ (Express funciona)
+- .NET 8 SDK (https://dotnet.microsoft.com/download/dotnet/8.0)
+- IIS con ASP.NET Core Hosting Bundle
+- SQL Server Management Studio (SSMS) recomendado
+
+=============================================
+PASO 1: CREAR LA BASE DE DATOS
+=============================================
+
+1. Abrir SQL Server Management Studio (SSMS)
+2. Conectar a tu servidor SQL (localhost)
+3. Abrir el archivo sql/FitConnectDB.sql
+4. Ejecutar el script completo (F5)
+   - Esto crea la base de datos FitConnectDB
+   - Crea todas las tablas con sus relaciones
+   - Inserta datos iniciales (sucursal Central, admin, membresias)
+
+=============================================
+PASO 2: CONFIGURAR EL BACKEND
+=============================================
+
+1. Abrir terminal en la carpeta backend/
+2. Editar appsettings.json si tu SQL Server usa credenciales diferentes:
+
+   Para Windows Authentication (por defecto):
+   "Server=localhost;Database=FitConnectDB;Trusted_Connection=true;TrustServerCertificate=true;"
+
+   Para SQL Server Authentication:
+   "Server=localhost;Database=FitConnectDB;User Id=sa;Password=TuPassword;TrustServerCertificate=true;"
+
+3. Restaurar paquetes y compilar:
+   dotnet restore
+   dotnet build
+
+4. Probar que funcione:
+   dotnet run
+   - Deberia iniciar en http://localhost:5000
+   - Abrir el navegador y probar http://localhost:5000/api/auth/login
+     (deberia devolver 405 Method Not Allowed porque es POST)
+
+=============================================
+PASO 3: COPIAR EL FRONTEND
+=============================================
+
+1. Crear la carpeta wwwroot/ dentro de backend/ si no existe:
+   mkdir backend\wwwroot
+
+2. Copiar todos los archivos de frontend/ a backend/wwwroot/:
+   - login.html
+   - index.html
+   - entrada.html
+
+3. Reiniciar la aplicacion (dotnet run)
+4. Abrir http://localhost:5000/login.html
+
+=============================================
+PASO 4: PROBAR LA APLICACION
+=============================================
+
+Credenciales por defecto:
+   Admin General:     admin@fitconnect.com / admin123
+   Admin Sucursal:    admin.central@fitconnect.com / central123
+
+1. Abrir http://localhost:5000/login.html
+2. Iniciar sesion con admin@fitconnect.com / admin123
+3. Verificar que el Dashboard carga correctamente
+4. Probar crear un cliente, registrar un pago, etc.
+
+=============================================
+PASO 5: PUBLICAR EN IIS
+=============================================
+
+1. Publicar la aplicacion:
+   cd backend
+   dotnet publish -c Release -o C:\inetpub\FitConnectPro
+
+2. Instalar el ASP.NET Core Hosting Bundle:
+   https://dotnet.microsoft.com/download/dotnet/8.0
+   (descargar "Hosting Bundle" de la seccion Windows)
+
+3. Configurar IIS:
+   a. Abrir IIS Manager
+   b. Click derecho en "Sites" > "Add Website"
+   c. Nombre: FitConnectPro
+   d. Ruta: C:\inetpub\FitConnectPro
+   e. Puerto: 80 (o el que prefieras)
+   f. En Application Pool: seleccionar "No Managed Code"
+
+4. Permisos:
+   - Dar permisos de lectura al usuario IIS_IUSRS en C:\inetpub\FitConnectPro
+
+5. Verificar:
+   - Abrir http://localhost/login.html
+
+=============================================
+PASO 6: PICO W (NFC) - OPCIONAL
+=============================================
+
+Si usas el lector NFC con Raspberry Pi Pico W:
+
+1. Configurar el Pico W para enviar lecturas por HTTP
+   al endpoint: POST http://TU_IP:PUERTO/api/nfclecturas/por-uid
+
+   Headers: Authorization: Bearer TU_JWT_TOKEN
+   Body: { "uid": "XX XX XX XX", "idSucursal": 1 }
+
+2. Para generar un token JWT para el Pico W, puedes:
+   - Hacer login con un usuario y usar ese token
+   - O agregar un endpoint sin autenticacion para NFC
+
+3. La pagina entrada.html pollea las lecturas NFC
+   cada 1.5 segundos y muestra la bienvenida
+
+=============================================
+ESTRUCTURA DEL PROYECTO
+=============================================
+
+fitadmin-iis/
+  sql/
+    FitConnectDB.sql          - Script de base de datos
+  backend/
+    Program.cs              - Punto de entrada de la API
+    FitConnectAPI.csproj       - Archivo de proyecto .NET
+    appsettings.json         - Configuracion (connection string, JWT)
+    Models/
+      Entities.cs            - Modelos Entity Framework
+      DTOs.cs                - Objetos de transferencia
+    Data/
+      FitConnectDbContext.cs   - Contexto de base de datos
+    Controllers/
+      AuthController.cs      - Login (usuarios y clientes)
+      SucursalesController.cs
+      UsuariosController.cs
+      ClientesController.cs
+      MembresiasController.cs
+      PagosController.cs
+      AsistenciasController.cs
+      ProductosController.cs
+      VentasController.cs
+      CortesCajaController.cs
+      NfcLecturasController.cs
+      ReportesController.cs  - Dashboard stats
+  frontend/
+    login.html               - Pagina de login
+    index.html                - Aplicacion principal (SPA)
+    entrada.html              - Pantalla de entrada NFC
+
+=============================================
+ENDPOINTS DE LA API
+=============================================
+
+POST   /api/auth/login              - Login de usuarios
+POST   /api/auth/login-cliente      - Login de clientes
+GET    /api/sucursales               - Listar sucursales
+POST   /api/sucursales               - Crear sucursal
+PUT    /api/sucursales/{id}          - Actualizar sucursal
+DELETE /api/sucursales/{id}          - Eliminar sucursal
+GET    /api/usuarios                 - Listar usuarios
+POST   /api/usuarios                 - Crear usuario
+PUT    /api/usuarios/{id}            - Actualizar usuario
+GET    /api/clientes                 - Listar clientes (con vigencia)
+POST   /api/clientes                 - Crear cliente
+PUT    /api/clientes/{id}            - Actualizar cliente
+GET    /api/membresias               - Listar membresias
+POST   /api/membresias               - Crear membresia
+PUT    /api/membresias/{id}          - Actualizar membresia
+GET    /api/pagos                    - Listar pagos
+POST   /api/pagos                    - Registrar pago
+GET    /api/asistencias              - Listar asistencias
+POST   /api/asistencias              - Registrar asistencia
+GET    /api/productos                - Listar productos
+POST   /api/productos                - Crear producto
+PUT    /api/productos/{id}           - Actualizar producto
+GET    /api/ventas                   - Listar ventas
+POST   /api/ventas                   - Registrar venta (descuenta stock)
+GET    /api/cortescaja               - Listar cortes
+POST   /api/cortescaja               - Crear corte
+PUT    /api/cortescaja/{id}/cerrar   - Cerrar corte (calcula totales)
+GET    /api/nfclecturas              - Listar lecturas NFC
+POST   /api/nfclecturas              - Crear lectura
+POST   /api/nfclecturas/por-uid      - Crear/actualizar por UID
+GET    /api/reportes/dashboard       - Estadisticas del dashboard
+
+=============================================
+USUARIOS POR DEFECTO
+=============================================
+
+admin@fitconnect.com          / admin123         (Admin General)
+admin.central@fitconnect.com  / central123       (Admin Sucursal - Central)
+
+Clientes: su contrasena por defecto es la parte
+antes del @ de su email.

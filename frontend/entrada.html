@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FitConnect - Entrada</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      color: #fff; overflow: hidden;
+      background: radial-gradient(circle at 50% 25%, #1e293b 0%, #0f172a 70%);
+    }
+    .conn { position: fixed; top: 16px; right: 16px; z-index: 20; font-size: 12px; padding: 4px 12px; border-radius: 999px; background: rgba(255,255,255,0.1); color: #cbd5e1; }
+    .conn.ok { background: rgba(16,185,129,0.2); color: #6ee7b7; }
+    .conn.err { background: rgba(239,68,68,0.25); color: #fca5a5; }
+    .wrap { position: relative; z-index: 10; width: 100%; max-width: 420px; padding: 0 24px; }
+    .brand { text-align: center; margin-bottom: 6px; font-size: 32px; font-weight: 700; color: #fff; }
+    .kiosk-info { text-align: center; margin-bottom: 40px; font-size: 14px; color: #64748b; }
+
+    .prompt { display: flex; flex-direction: column; align-items: center; text-align: center; }
+    .ring-wrap { position: relative; margin-bottom: 32px; width: 128px; height: 128px; }
+    .pulse-ring { position: absolute; inset: 0; border-radius: 50%; border: 2px solid #34d399; animation: pulse-ring 2s ease-out infinite; }
+    @keyframes pulse-ring { 0% { transform: scale(0.8); opacity: 1; } 100% { transform: scale(1.6); opacity: 0; } }
+    .ring-core { position: relative; width: 128px; height: 128px; border-radius: 50%; background: rgba(30,41,59,0.8); border: 2px solid #10b981; display: flex; align-items: center; justify-content: center; color: #10b981; }
+    .ring-core svg { width: 48px; height: 48px; }
+    .prompt-text { font-size: 18px; color: #94a3b8; }
+
+    .card { display: none; }
+    .card.show { display: block; }
+    .panel { border-radius: 16px; padding: 32px; text-align: center; background: rgba(30,41,59,0.93); animation: fadeIn 0.5s ease forwards; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    .icon-box { width: 64px; height: 64px; border-radius: 50%; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; color: #10b981; }
+    .icon-box svg { width: 36px; height: 36px; }
+    .result-label { font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; font-weight: 600; color: #10b981; }
+    .client-name { font-size: 30px; font-weight: 700; color: #fff; margin-bottom: 24px; }
+    .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+    .meta-box { border-radius: 12px; padding: 16px; background: #0f172a; }
+    .meta-box .lbl { font-size: 11px; text-transform: uppercase; margin-bottom: 4px; color: #64748b; font-weight: 500; }
+    .meta-box .val-days { font-size: 30px; font-weight: 700; color: #34d399; }
+    .meta-box .val-date { font-size: 18px; font-weight: 700; color: #fff; }
+    .membership { font-weight: 600; margin-bottom: 24px; color: #34d399; }
+    .btn { padding: 10px 24px; border-radius: 8px; font-weight: 600; color: #fff; background: #10b981; border: none; cursor: pointer; font-size: 15px; }
+    .btn:hover { background: #059669; }
+  </style>
+</head>
+<body>
+  <div id="conn" class="conn">Conectando...</div>
+
+  <div class="wrap">
+    <h1 class="brand">FitConnect</h1>
+    <p class="kiosk-info" id="kioskInfo"></p>
+
+    <div id="nfc-prompt" class="prompt">
+      <div class="ring-wrap">
+        <div class="pulse-ring"></div>
+        <div class="ring-core" id="nfc-icon"></div>
+      </div>
+      <p class="prompt-text">Acerca tu tarjeta NFC para registrar entrada</p>
+    </div>
+
+    <div id="welcome-card" class="card">
+      <div class="panel">
+        <div id="result-icon-box" class="icon-box"></div>
+        <p id="result-label" class="result-label">Bienvenido</p>
+        <h2 id="client-name" class="client-name"></h2>
+        <div id="meta-grid" class="meta-grid">
+          <div class="meta-box"><p class="lbl">Dias restantes</p><p id="days-remaining" class="val-days"></p></div>
+          <div class="meta-box"><p class="lbl">Vence el</p><p id="expiry-date" class="val-date"></p></div>
+        </div>
+        <p id="membership-type" class="membership"></p>
+        <button onclick="resetScreen()" class="btn">Listo</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Iconos SVG embebidos (estilo Lucide) - sin CDN
+    const ICONS = {
+      nfc: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8.32a7.43 7.43 0 0 1 0 7.36"/><path d="M9.46 6.21a11.76 11.76 0 0 1 0 11.58"/><path d="M12.91 4.1a15.91 15.91 0 0 1 .01 15.8"/><path d="M16.37 2a20.16 20.16 0 0 1 0 20"/></svg>',
+      'check-circle': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>',
+      'x-circle': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>',
+      'shield-alert': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>',
+      'help-circle': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>'
+    };
+    document.getElementById('nfc-icon').innerHTML = ICONS.nfc;
+
+    const API = '/api';
+    const session = JSON.parse(localStorage.getItem('fitconnect_session') || '{}');
+    if (!session.token) location.href = 'login.html';
+    const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (session.token || '') };
+    document.getElementById('kioskInfo').textContent = session.nombre || '';
+
+    const STATES = {
+      ok:            { icon: 'check-circle', color: '#10b981', label: 'Bienvenido',            meta: true  },
+      vencida:       { icon: 'x-circle',     color: '#ef4444', label: 'Membresia vencida',     meta: true  },
+      otra_sede:     { icon: 'shield-alert', color: '#f59e0b', label: 'Solo en su sucursal',   meta: false },
+      no_registrado: { icon: 'help-circle',  color: '#94a3b8', label: 'Llavero no registrado', meta: false }
+    };
+
+    let lastSeen = {}, initialized = false, processing = false, resetTimer = null;
+
+    function setStatus(msg, kind) {
+      const el = document.getElementById('conn');
+      el.textContent = msg;
+      el.className = 'conn' + (kind ? (' ' + kind) : '');
+    }
+
+    async function pollNfc() {
+      if (processing) return;
+      try {
+        const r = await fetch(`${API}/nfclecturas`, { headers, cache: 'no-store' });
+        if (r.status === 401) { setStatus('Sesion expirada', 'err'); clearInterval(pollTimer); setTimeout(() => location.href = 'login.html', 3000); return; }
+        if (!r.ok) { setStatus('Servidor no responde (' + r.status + ')', 'err'); return; }
+        const d = await r.json();
+        setStatus('Conectado', 'ok');
+        const items = d.items || [];
+        if (!initialized) { items.forEach(l => lastSeen[l.uid] = l.timestamp); initialized = true; return; }
+        const changed = items.find(l => lastSeen[l.uid] !== l.timestamp);
+        if (!changed) return;
+        items.forEach(l => lastSeen[l.uid] = l.timestamp);
+        processNfcScan(changed.uid);
+      } catch (e) { setStatus('Sin conexion', 'err'); }
+    }
+    const pollTimer = setInterval(pollNfc, 1500);
+
+    async function processNfcScan(uid) {
+      processing = true;
+      try {
+        const r = await fetch(`${API}/asistencias/acceso`, { method: 'POST', headers, body: JSON.stringify({ uid }) });
+        if (r.status === 401) { setStatus('Sesion expirada', 'err'); clearInterval(pollTimer); setTimeout(() => location.href = 'login.html', 3000); return; }
+        const d = await r.json();
+        showResult(d, uid);
+      } catch (e) {
+        showResult({ estado: 'no_registrado' }, uid);
+      }
+    }
+
+    function showResult(d, uid) {
+      const cfg = STATES[d.estado] || STATES.no_registrado;
+
+      const box = document.getElementById('result-icon-box');
+      box.style.background = cfg.color + '33';
+      box.style.color = cfg.color;
+      box.innerHTML = ICONS[cfg.icon] || ICONS['help-circle'];
+
+      const label = document.getElementById('result-label');
+      label.style.color = cfg.color;
+      label.textContent = (d.estado === 'ok' && d.visitante) ? 'Bienvenido - Visitante' : cfg.label;
+
+      document.getElementById('client-name').textContent = d.nombre || (d.estado === 'no_registrado' ? (uid || 'Desconocido') : '');
+
+      const grid = document.getElementById('meta-grid');
+      const memb = document.getElementById('membership-type');
+      if (cfg.meta) {
+        grid.style.display = '';
+        const days = document.getElementById('days-remaining');
+        days.textContent = Math.max(0, d.diasRestantes || 0);
+        days.style.color = cfg.color;
+        document.getElementById('expiry-date').textContent = d.vigencia
+          ? new Date(d.vigencia).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
+        memb.style.display = '';
+        memb.style.color = cfg.color;
+        memb.textContent = d.membresia ? ('Membresia ' + d.membresia) : '';
+      } else {
+        grid.style.display = 'none';
+        memb.style.display = 'none';
+      }
+
+      document.getElementById('nfc-prompt').style.display = 'none';
+      document.getElementById('welcome-card').classList.add('show');
+
+      clearTimeout(resetTimer);
+      resetTimer = setTimeout(resetScreen, 6000);
+    }
+
+    function resetScreen() {
+      clearTimeout(resetTimer);
+      document.getElementById('welcome-card').classList.remove('show');
+      document.getElementById('nfc-prompt').style.display = '';
+      processing = false;
+    }
+  </script>
+</body>
+</html>

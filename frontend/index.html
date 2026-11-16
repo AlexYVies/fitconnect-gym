@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitConnect Pro</title>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; display: flex; min-height: 100vh; background: #f1f5f9; color: #1e293b; overflow-x: hidden; }
+        .sidebar { width: 240px; min-height: 100vh; background: #1e2235; display: flex; flex-direction: column; position: fixed; left: 0; top: 0; bottom: 0; z-index: 50; }
+        .sidebar-brand { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .sidebar-brand h1 { color: #f1f5f9; font-size: 1.25rem; font-weight: 700; }
+        .sidebar-brand p { color: #64748b; font-size: 0.75rem; margin-top: 0.15rem; }
+        .sidebar-nav { flex: 1; padding: 0.75rem; overflow-y: auto; }
+        .nav-section { margin-bottom: 0.75rem; }
+        .nav-section-title { color: #475569; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; padding: 0.5rem 0.75rem; font-weight: 600; }
+        .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 0.75rem; color: #94a3b8; border-radius: 0.5rem; cursor: pointer; font-size: 0.875rem; transition: all 0.15s; border: none; background: none; width: 100%; text-align: left; }
+        .nav-item:hover { background: rgba(255,255,255,0.05); color: #e2e8f0; }
+        .nav-item.active { background: #0d9488; color: #fff; font-weight: 500; }
+        .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+        .sidebar-footer { padding: 1rem; border-top: 1px solid rgba(255,255,255,0.08); }
+        .user-info { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+        .user-avatar { width: 36px; height: 36px; background: #0d9488; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: 0.85rem; }
+        .user-name { color: #e2e8f0; font-size: 0.85rem; font-weight: 500; }
+        .user-role { color: #64748b; font-size: 0.7rem; text-transform: capitalize; }
+        .btn-logout { display: flex; align-items: center; gap: 0.5rem; width: 100%; padding: 0.5rem 0.75rem; background: rgba(239,68,68,0.1); color: #f87171; border: none; border-radius: 0.5rem; cursor: pointer; font-size: 0.8rem; transition: all 0.15s; }
+        .btn-logout:hover { background: rgba(239,68,68,0.2); }
+        .btn-logout svg { width: 16px; height: 16px; }
+        .main { flex: 1; margin-left: 240px; min-width: 0; }
+        .topbar { background: #fff; padding: 1rem 2rem; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; }
+        .topbar h2 { font-size: 1.25rem; font-weight: 600; color: #1e293b; }
+        .badge-sucursal { background: #f0fdfa; color: #0d9488; padding: 0.35rem 0.75rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 500; }
+        .content { padding: 1.5rem 2rem; }
+        .card { background: #fff; border-radius: 0.75rem; border: 1px solid #e2e8f0; padding: 1.5rem; margin-bottom: 1.5rem; overflow-x: auto; }
+        .card-title { font-size: 1rem; font-weight: 600; color: #1e293b; margin-bottom: 1rem; }
+        .form-row { display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap; }
+        .form-group { flex: 1; min-width: 180px; }
+        .form-group label { display: block; font-size: 0.8rem; color: #64748b; margin-bottom: 0.35rem; font-weight: 500; }
+        .form-group input, .form-group select { width: 100%; padding: 0.6rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; font-size: 0.9rem; color: #1e293b; background: #fff; outline: none; transition: border-color 0.2s; }
+        .form-group input:focus, .form-group select:focus { border-color: #0d9488; box-shadow: 0 0 0 3px rgba(13,148,136,0.1); }
+        .btn-primary { padding: 0.6rem 1.5rem; background: #0d9488; color: #fff; border: none; border-radius: 0.5rem; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+        .btn-primary:hover { background: #0f766e; }
+        .btn-secondary { padding: 0.5rem 1rem; background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; border-radius: 0.5rem; font-size: 0.85rem; cursor: pointer; transition: all 0.15s; }
+        .btn-secondary:hover { background: #e2e8f0; }
+        .btn-danger { padding: 0.5rem 1rem; background: rgba(239,68,68,0.1); color: #ef4444; border: none; border-radius: 0.5rem; font-size: 0.85rem; cursor: pointer; }
+        .btn-danger:hover { background: rgba(239,68,68,0.2); }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 0.75rem 1rem; font-size: 0.75rem; font-weight: 600; color: #0d9488; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 2px solid #e2e8f0; background: #f8fafc; white-space: nowrap; }
+        td { padding: 0.75rem 1rem; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; white-space: nowrap; }
+        tr:hover { background: #f8fafc; }
+        .td-monto { font-weight: 600; color: #059669; }
+        .td-metodo { padding: 0.2rem 0.6rem; border-radius: 1rem; font-size: 0.8rem; font-weight: 500; }
+        .metodo-efectivo { background: #dcfce7; color: #16a34a; }
+        .metodo-tarjeta { background: #dbeafe; color: #2563eb; }
+        .metodo-transferencia { background: #fef3c7; color: #d97706; }
+        .empty-state { text-align: center; color: #94a3b8; padding: 2rem !important; }
+        .section { display: none; }
+        .section.active { display: block; }
+        .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+        .stat-card { background: #fff; border-radius: 0.75rem; border: 1px solid #e2e8f0; padding: 1.25rem; display: flex; align-items: center; gap: 1rem; }
+        .stat-icon { width: 48px; height: 48px; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; }
+        .stat-icon svg { width: 24px; height: 24px; }
+        .stat-icon.teal { background: #f0fdfa; color: #0d9488; }
+        .stat-icon.blue { background: #eff6ff; color: #3b82f6; }
+        .stat-icon.green { background: #f0fdf4; color: #22c55e; }
+        .stat-icon.orange { background: #fff7ed; color: #f97316; }
+        .stat-icon.purple { background: #f5f3ff; color: #8b5cf6; }
+        .stat-info h3 { font-size: 1.5rem; font-weight: 700; color: #1e293b; }
+        .stat-info p { font-size: 0.8rem; color: #64748b; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; display: none; align-items: center; justify-content: center; }
+        .modal-overlay.active { display: flex; }
+        .modal-box { background: #fff; border-radius: 0.75rem; padding: 1.5rem; width: 90%; max-width: 500px; }
+        .modal-box h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; }
+        .toast { position: fixed; bottom: 2rem; right: 2rem; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-size: 0.9rem; z-index: 200; transform: translateY(100px); opacity: 0; transition: all 0.3s; }
+        .toast.visible { transform: translateY(0); opacity: 1; }
+        .toast.success { background: #065f46; color: #fff; }
+        .toast.error { background: #991b1b; color: #fff; }
+        .topbar-left { display: flex; align-items: center; gap: 0.5rem; }
+        .hamburger { display: none; background: none; border: none; cursor: pointer; padding: 0.25rem; color: #1e293b; }
+        .hamburger svg { width: 26px; height: 26px; }
+        .backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 40; }
+        .backdrop.visible { display: block; }
+        @media(max-width:768px){
+            .sidebar { transform: translateX(-100%); transition: transform 0.25s ease; z-index: 60; }
+            .sidebar.open { transform: translateX(0); }
+            .main { margin-left: 0; }
+            .hamburger { display: flex; }
+            .topbar { padding: 1rem 1.25rem; }
+            .content { padding: 1.25rem 1rem; }
+            .stats-row { grid-template-columns: 1fr; }
+            .form-row { flex-direction: column; align-items: stretch; }
+            .form-group { min-width: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-brand"><h1>FitConnect Pro</h1><p id="brandRole"></p></div>
+        <nav class="sidebar-nav" id="sidebarNav"></nav>
+        <div class="sidebar-footer">
+            <div class="user-info"><div class="user-avatar" id="userAvatar">A</div><div><div class="user-name" id="userName">Admin</div><div class="user-role" id="userRole">admin</div></div></div>
+            <button class="btn-logout" onclick="logout()"><i data-lucide="log-out"></i>Cerrar sesion</button>
+        </div>
+    </div>
+
+    <div class="backdrop" id="backdrop" onclick="toggleSidebar()"></div>
+
+    <div class="main">
+        <div class="topbar"><div class="topbar-left"><button class="hamburger" onclick="toggleSidebar()" aria-label="Menu"><i data-lucide="menu"></i></button><h2 id="pageTitle">Dashboard</h2></div><div class="topbar-right"><span class="badge-sucursal" id="badgeSucursal">Sucursal</span></div></div>
+        <div class="content">
+            <!-- DASHBOARD -->
+            <div class="section active" id="sec-dashboard">
+                <div class="stats-row" id="dashStats"></div>
+                <div class="card"><h3 class="card-title">Pagos recientes</h3><table><thead><tr><th>Fecha</th><th>Cliente</th><th>Membresia</th><th>Monto</th><th>Metodo</th></tr></thead><tbody id="dashRecentPagos"></tbody></table></div>
+            </div>
+            <!-- PAGOS -->
+            <div class="section" id="sec-pagos">
+                <div class="card" id="cardRegistrarPago"><h3 class="card-title">Registrar Pago</h3>
+                    <form id="pagoForm" onsubmit="registrarPago(event)"><div class="form-row">
+                        <div class="form-group"><label>Cliente</label><select id="pagoCliente" required></select></div>
+                        <div class="form-group"><label>Membresia</label><select id="pagoMembresia" required onchange="updatePagoMonto()"></select></div>
+                        <div class="form-group"><label>Monto</label><input type="number" id="pagoMonto" step="0.01" required></div>
+                        <div class="form-group"><label>Metodo</label><select id="pagoMetodo"><option value="efectivo">Efectivo</option><option value="tarjeta">Tarjeta</option><option value="transferencia">Transferencia</option></select></div>
+                        <button type="submit" class="btn-primary">Registrar Pago</button>
+                    </div></form>
+                </div>
+                <div class="card"><h3 class="card-title">Historial de Pagos</h3><table><thead><tr><th>Fecha</th><th>Cliente</th><th>Membresia</th><th>Monto</th><th>Metodo</th><th>Recepcionista</th></tr></thead><tbody id="pagosTable"></tbody></table></div>
+            </div>
+            <!-- CLIENTES -->
+            <div class="section" id="sec-clientes">
+                <div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem"><h3 class="card-title" style="margin:0">Clientes</h3><div style="display:flex;gap:0.75rem"><input type="text" id="clienteSearch" placeholder="Buscar..." oninput="debouncedClienteSearch()" style="padding:0.5rem 0.75rem;border:1px solid #e2e8f0;border-radius:0.5rem;font-size:0.85rem"><button class="btn-primary" id="btnAddCliente" onclick="openClienteModal()">+ Nuevo</button></div></div><table><thead><tr><th>Nombre</th><th>Telefono</th><th>Email</th><th>NFC</th><th>Estatus</th><th>Acciones</th></tr></thead><tbody id="clientesTable"></tbody></table></div>
+            </div>
+            <!-- MEMBRESIAS -->
+            <div class="section" id="sec-membresias">
+                <div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem"><h3 class="card-title" style="margin:0">Tipos de Membresia</h3><button class="btn-primary" id="btnAddMem" onclick="openMembresiaModal()">+ Nueva</button></div><table><thead><tr><th>Nombre</th><th>Precio</th><th>Duracion</th><th>Estatus</th><th>Acciones</th></tr></thead><tbody id="membresiasTable"></tbody></table></div>
+            </div>
+            <!-- ASISTENCIAS -->
+            <div class="section" id="sec-asistencias">
+                <div class="card"><div style="display:flex;gap:1rem;margin-bottom:1rem;align-items:flex-end"><div class="form-group" style="max-width:200px"><label>Fecha</label><input type="date" id="asistFecha" onchange="loadAsistencias()"></div><div class="form-group" style="max-width:200px"><label>Buscar</label><input type="text" id="asistSearch" placeholder="Nombre..." oninput="loadAsistencias()"></div></div><table><thead><tr><th>Hora</th><th>Cliente</th><th>Metodo</th><th>UID NFC</th></tr></thead><tbody id="asistenciasTable"></tbody></table></div>
+            </div>
+            <!-- PRODUCTOS -->
+            <div class="section" id="sec-productos">
+                <div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem"><h3 class="card-title" style="margin:0">Inventario</h3><button class="btn-primary" id="btnAddProd" onclick="openProductoModal()">+ Nuevo Producto</button></div><table><thead><tr><th>Nombre</th><th>Precio</th><th>Stock</th><th>Categoria</th><th>Acciones</th></tr></thead><tbody id="productosTable"></tbody></table></div>
+            </div>
+            <!-- VENTAS -->
+            <div class="section" id="sec-ventas">
+                <div class="card" id="cardRegistrarVenta"><h3 class="card-title">Registrar Venta</h3>
+                    <form id="ventaForm" onsubmit="agregarAlCarrito(event)"><div class="form-row">
+                        <div class="form-group"><label>Producto</label><select id="ventaProducto" onchange="updateVentaPrecio()"></select></div>
+                        <div class="form-group" style="max-width:100px"><label>Cantidad</label><input type="number" id="ventaCantidad" value="1" min="1" oninput="updateVentaTotal()"></div>
+                        <div class="form-group" style="max-width:130px"><label>Subtotal</label><input type="number" id="ventaTotal" step="0.01" readonly></div>
+                        <button type="submit" class="btn-secondary" style="align-self:flex-end">+ Agregar al carrito</button>
+                    </div></form>
+                    <div id="ventaCarritoWrap" style="margin-top:1rem;display:none">
+                        <table>
+                            <thead><tr><th>Producto</th><th>Precio</th><th>Cant</th><th>Subtotal</th><th></th></tr></thead>
+                            <tbody id="ventaCarritoBody"></tbody>
+                        </table>
+                        <div class="form-row" style="margin-top:1rem;align-items:flex-end;justify-content:space-between">
+                            <div class="form-group" style="max-width:180px"><label>Metodo</label><select id="ventaMetodo"><option value="efectivo">Efectivo</option><option value="tarjeta">Tarjeta</option></select></div>
+                            <div style="display:flex;align-items:center;gap:1rem">
+                                <div style="font-size:1.1rem;font-weight:700">Total: <span id="ventaCarritoTotal">$0.00</span></div>
+                                <button type="button" class="btn-secondary" onclick="vaciarCarrito()">Vaciar</button>
+                                <button type="button" class="btn-primary" onclick="registrarVenta()">Cobrar Venta</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card"><h3 class="card-title">Historial</h3><table><thead><tr><th>Fecha</th><th>Producto</th><th>Cant</th><th>Total</th><th>Metodo</th><th>Recepcionista</th></tr></thead><tbody id="ventasTable"></tbody></table></div>
+            </div>
+            <!-- CORTE -->
+            <div class="section" id="sec-corte">
+                <div class="stats-row" id="corteStats"></div>
+                <div style="margin-bottom:1rem" id="wrapGenerarCorte"><button class="btn-primary" onclick="generarCorte()">Generar Corte de Caja</button></div>
+                <div class="card"><h3 class="card-title">Historial de Cortes</h3><table><thead><tr><th>Fecha</th><th>Recepcionista</th><th>Membresias</th><th>Productos</th><th>Efectivo</th><th>Tarjeta</th><th>Total</th><th>Estatus</th></tr></thead><tbody id="cortesTable"></tbody></table></div>
+            </div>
+            <!-- SUCURSALES -->
+            <div class="section" id="sec-sucursales">
+                <div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem"><h3 class="card-title" style="margin:0">Sucursales</h3><button class="btn-primary" onclick="openSucursalModal()">+ Nueva</button></div><table><thead><tr><th>Nombre</th><th>Direccion</th><th>Telefono</th><th>Estatus</th><th>Acciones</th></tr></thead><tbody id="sucursalesTable"></tbody></table></div>
+            </div>
+            <!-- USUARIOS -->
+            <div class="section" id="sec-usuarios">
+                <div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem"><h3 class="card-title" style="margin:0">Usuarios</h3><button class="btn-primary" onclick="openUsuarioModal()">+ Nuevo</button></div><table><thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Sucursal</th><th>Estatus</th><th>Acciones</th></tr></thead><tbody id="usuariosTable"></tbody></table></div>
+            </div>
+            <!-- REPORTES -->
+            <div class="section" id="sec-reportes">
+                <div class="card"><h3 class="card-title">Filtros</h3><div class="form-row">
+                    <div class="form-group" id="repSucursalGroup"><label>Sucursal</label><select id="repSucursal"></select></div>
+                    <div class="form-group"><label>Desde</label><input type="date" id="repDesde"></div>
+                    <div class="form-group"><label>Hasta</label><input type="date" id="repHasta"></div>
+                    <button class="btn-primary" onclick="generarReporte()">Generar</button>
+                </div></div>
+                <div id="reporteResult"></div>
+            </div>
+
+            <div class="section" id="sec-kiosko">
+                <div class="card">
+                    <h3 class="card-title">Control remoto de actuadores</h3>
+                    <p style="color:#64748b;margin-bottom:1rem">Envia comandos por MQTT al kiosko (ESP32). Util para probar los LEDs y el buzzer sin pasar un llavero.</p>
+                    <div class="form-row" id="kioskoSucRow" style="display:none">
+                        <div class="form-group"><label>Sucursal (kiosko)</label><select id="kioskoSuc"></select></div>
+                    </div>
+                    <div id="kioskoBtns" style="display:flex;flex-wrap:wrap;gap:0.75rem;margin-top:0.5rem"></div>
+                    <p id="kioskoMsg" style="margin-top:1rem;color:#64748b;font-size:0.9rem"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALES -->
+    <div class="modal-overlay" id="modalCliente"><div class="modal-box"><h3 id="clienteModalTitle">Nuevo Cliente</h3><form onsubmit="saveCliente(event)"><input type="hidden" id="cliEditId"><div class="form-group"><label>Nombre</label><input id="cliNombre" required></div><div class="form-row"><div class="form-group"><label>Telefono</label><input id="cliTelefono"></div><div class="form-group"><label>Email</label><input id="cliEmail" type="email"></div></div><div style="display:flex;gap:0.75rem;justify-content:flex-end;margin-top:1rem"><button type="button" class="btn-secondary" onclick="closeModal('modalCliente')">Cancelar</button><button type="submit" class="btn-primary">Guardar</button></div></form></div></div>
+
+    <div class="modal-overlay" id="modalNfc"><div class="modal-box"><h3 id="nfcModalTitle">Asignar NFC</h3><p id="nfcClienteLabel" style="margin-bottom:1rem;color:#64748b"></p><input type="hidden" id="nfcClienteId"><input type="hidden" id="nfcUid"><div id="nfcScanArea" style="text-align:center;padding:2rem"><div style="width:80px;height:80px;border-radius:50%;background:#f0fdfa;display:inline-flex;align-items:center;justify-content:center;margin-bottom:1rem;animation:pulse 2s infinite"><i data-lucide="wifi" style="width:32px;height:32px;color:#0d9488"></i></div><p id="nfcStatusText" style="color:#64748b">Esperando llavero...</p></div><div id="nfcDetected" style="display:none;text-align:center;padding:1rem"><div style="width:60px;height:60px;border-radius:50%;background:#dcfce7;display:inline-flex;align-items:center;justify-content:center;margin-bottom:0.5rem"><i data-lucide="check" style="width:28px;height:28px;color:#16a34a"></i></div><p style="font-weight:600;color:#1e293b">Llavero detectado</p><p id="nfcDetectedUid" style="color:#64748b;font-size:0.9rem"></p></div><div style="display:flex;gap:0.75rem;justify-content:flex-end;margin-top:1rem"><button class="btn-secondary" onclick="closeNfcModal()">Cancelar</button><button class="btn-primary" id="btnSaveNfc" onclick="saveNfc(event)" disabled style="opacity:0.5">Asignar</button></div></div></div>
+
+    <div class="modal-overlay" id="modalMembresia"><div class="modal-box"><h3 id="memModalTitle">Nueva Membresia</h3><form onsubmit="saveMembresia(event)"><input type="hidden" id="memEditId"><div class="form-group"><label>Nombre</label><input id="memNombre" required></div><div class="form-row"><div class="form-group"><label>Precio</label><input id="memPrecio" type="number" step="0.01" required></div><div class="form-group"><label>Duracion (dias)</label><input id="memDias" type="number" required></div></div><div class="form-group"><label>Descripcion</label><input id="memDesc"></div><div style="display:flex;gap:0.75rem;justify-content:flex-end;margin-top:1rem"><button type="button" class="btn-secondary" onclick="closeModal('modalMembresia')">Cancelar</button><button type="submit" class="btn-primary">Guardar</button></div></form></div></div>
+
+    <div class="modal-overlay" id="modalProducto"><div class="modal-box"><h3 id="prodModalTitle">Nuevo Producto</h3><form onsubmit="saveProducto(event)"><input type="hidden" id="prodEditId"><div class="form-group"><label>Nombre</label><input id="prodNombre" required></div><div class="form-row"><div class="form-group"><label>Precio</label><input id="prodPrecio" type="number" step="0.01" required></div><div class="form-group"><label>Categoria</label><select id="prodCategoria"></select></div></div><div style="display:flex;gap:0.75rem;justify-content:flex-end;margin-top:1rem"><button type="button" class="btn-secondary" onclick="closeModal('modalProducto')">Cancelar</button><button type="submit" class="btn-primary">Guardar</button></div></form></div></div>
+
+    <div class="modal-overlay" id="stockModal"><div class="modal-box" style="max-width:420px"><h3 id="stockModalTitle">Stock por sucursal</h3><table><thead><tr><th>Sucursal</th><th>Stock</th></tr></thead><tbody id="stockBody"></tbody></table><div style="display:flex;justify-content:flex-end;margin-top:1rem"><button type="button" class="btn-secondary" onclick="closeModal('stockModal')">Cerrar</button></div></div></div>
+
+    <div class="modal-overlay" id="movModal"><div class="modal-box"><h3 id="movModalTitle">Movimiento</h3><form onsubmit="saveMovimiento(event)"><input type="hidden" id="movProdId"><input type="hidden" id="movTipo"><div class="form-group"><label>Cantidad</label><input id="movCantidad" type="number" min="1" required></div><div class="form-group"><label>Motivo</label><input id="movMotivo" placeholder="Ej. producto danado, reabastecimiento"></div><div style="display:flex;gap:0.75rem;justify-content:flex-end;margin-top:1rem"><button type="button" class="btn-secondary" onclick="closeModal('movModal')">Cancelar</button><button type="submit" class="btn-primary">Registrar</button></div></form></div></div>
+
+    <div class="modal-overlay" id="histModal"><div class="modal-box" style="max-width:560px"><h3>Historial de movimientos</h3><table><thead><tr><th>Fecha</th><th>Tipo</th><th>Cantidad</th><th>Motivo</th></tr></thead><tbody id="histBody"></tbody></table><div style="display:flex;justify-content:flex-end;margin-top:1rem"><button type="button" class="btn-secondary" onclick="closeModal('histModal')">Cerrar</button></div></div></div>
+
+    <div class="modal-overlay" id="modalSucursal"><div class="modal-box"><h3>Sucursal</h3><form onsubmit="saveSucursal(event)"><input type="hidden" id="sucEditId"><div class="form-group"><label>Nombre</label><input id="sucNombre" required></div><div class="form-group"><label>Direccion</label><input id="sucDireccion"></div><div class="form-group"><label>Telefono</label><input id="sucTelefono"></div><div style="display:flex;gap:0.75rem;justify-content:flex-end;margin-top:1rem"><button type="button" class="btn-secondary" onclick="closeModal('modalSucursal')">Cancelar</button><button type="submit" class="btn-primary">Guardar</button></div></form></div></div>
+
+    <div class="modal-overlay" id="modalUsuario"><div class="modal-box"><h3 id="usrModalTitle">Nuevo Usuario</h3><form onsubmit="saveUsuario(event)"><input type="hidden" id="usrEditId"><div class="form-group"><label>Nombre</label><input id="usrNombre" required></div><div class="form-group"><label>Email</label><input id="usrEmail" type="email" required></div><div class="form-group"><label>Contrasena</label><input id="usrPassword" required></div><div class="form-row"><div class="form-group"><label>Rol</label><select id="usrRol" onchange="toggleUsrSucursal()"><option value="recepcionista">Recepcionista</option><option value="admin_sucursal">Admin Sucursal</option><option value="admin_general">Admin General</option><option value="kiosko">Kiosco de entrada</option></select></div><div class="form-group" id="usrSucursalGroup"><label>Sucursal</label><select id="usrSucursal"></select></div></div><div style="display:flex;gap:0.75rem;justify-content:flex-end;margin-top:1rem"><button type="button" class="btn-secondary" onclick="closeModal('modalUsuario')">Cancelar</button><button type="submit" class="btn-primary">Guardar</button></div></form></div></div>
+
+    <div class="toast" id="toast"><span id="toastMsg">OK</span></div>
+    <style>@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}</style>
+
+    <script>
+    const API = '/api';
+    let session = null;
+    let clientesCache = [];
+    let membresiasCache = [];
+    let productosCache = [];
+    let sucursalesCache = [];
+    let searchTimeout = null;
+
+    function getSession() { try { return JSON.parse(localStorage.getItem('fitconnect_session')); } catch { return null; } }
+    function logout() { localStorage.removeItem('fitconnect_session'); window.location.href = 'login.html'; }
+    function authHeaders() { return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (session?.token || '') }; }
+
+    async function api(endpoint) {
+        const r = await fetch(`${API}/${endpoint}`, { headers: authHeaders() });
+        if (r.status === 401) { logout(); return []; }
+        const d = await r.json();
+        return d.items || [];
+    }
+    async function apiCreate(endpoint, data) {
+        const r = await fetch(`${API}/${endpoint}`, { method: 'POST', headers: authHeaders(), body: JSON.stringify(data) });
+        if (r.status === 401) { logout(); return null; }
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error || `HTTP ${r.status}`);
+        return d;
+    }
+    async function apiUpdate(endpoint, id, data) {
+        const r = await fetch(`${API}/${endpoint}/${id}`, { method: 'PUT', headers: authHeaders(), body: JSON.stringify(data) });
+        if (r.status === 401) { logout(); return null; }
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error || `HTTP ${r.status}`);
+        return d;
+    }
+    async function apiDelete(endpoint, id) {
+        const r = await fetch(`${API}/${endpoint}/${id}`, { method: 'DELETE', headers: authHeaders() });
+        if (r.status === 401) { logout(); return null; }
+        if (!r.ok) { let msg = `HTTP ${r.status}`; try { const d = await r.json(); if (d.error) msg = d.error; } catch (e) {} throw new Error(msg); }
+        return true;
+    }
+
+    function esc(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+    function fmt$(n) { return '$' + Number(n || 0).toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 2 }); }
+    function fmtDate(d) { if (!d) return '-'; try { return new Date(d).toLocaleDateString('es-MX') } catch { return d } }
+    function metodoBadge(m) { const c = m === 'efectivo' ? 'efectivo' : m === 'tarjeta' ? 'tarjeta' : 'transferencia'; return `<span class="td-metodo metodo-${c}">${esc(m)}</span>`; }
+    function showToast(msg, type = 'success') { const t = document.getElementById('toast'); t.className = 'toast ' + type; document.getElementById('toastMsg').textContent = msg; t.classList.add('visible'); setTimeout(() => t.classList.remove('visible'), 3000); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    const MENU = [
+        { section: 'Principal' },
+        { id: 'dashboard', icon: 'layout-dashboard', label: 'Dashboard', roles: ['admin_general', 'admin_sucursal', 'recepcionista'] },
+        { section: 'Operacion' },
+        { id: 'pagos', icon: 'credit-card', label: 'Pagos', roles: ['admin_general', 'admin_sucursal', 'recepcionista'] },
+        { id: 'clientes', icon: 'users', label: 'Clientes', roles: ['admin_general', 'admin_sucursal', 'recepcionista'] },
+        { id: 'asistencias', icon: 'clipboard-check', label: 'Asistencias', roles: ['admin_general', 'admin_sucursal', 'recepcionista'] },
+        { id: 'ventas', icon: 'receipt', label: 'Ventas', roles: ['admin_general', 'admin_sucursal', 'recepcionista'] },
+        { id: 'corte', icon: 'calculator', label: 'Corte de Caja', roles: ['admin_general', 'admin_sucursal', 'recepcionista'] },
+        { section: 'Administracion' },
+        { id: 'membresias', icon: 'tag', label: 'Membresias', roles: ['admin_general', 'admin_sucursal'] },
+        { id: 'productos', icon: 'shopping-bag', label: 'Inventario', roles: ['admin_general', 'admin_sucursal', 'recepcionista'] },
+        { id: 'sucursales', icon: 'building-2', label: 'Sucursales', roles: ['admin_general'] },
+        { id: 'usuarios', icon: 'shield', label: 'Usuarios', roles: ['admin_general', 'admin_sucursal'] },
+        { id: 'reportes', icon: 'bar-chart-3', label: 'Reportes', roles: ['admin_general', 'admin_sucursal'] },
+        { id: 'kiosko', icon: 'radio', label: 'Kiosko / Actuadores', roles: ['admin_general', 'admin_sucursal', 'recepcionista'] },
+    ];
+
+    function buildSidebar() {
+        const nav = document.getElementById('sidebarNav');
+        let html = '';
+        for (let i = 0; i < MENU.length; i++) {
+            const m = MENU[i];
+            if (m.section) {
+                const nextSec = MENU.slice(i + 1).findIndex(x => x.section);
+                const sectionItems = (nextSec === -1 ? MENU.slice(i + 1) : MENU.slice(i + 1, i + 1 + nextSec));
+                if (!sectionItems.some(x => x.roles && x.roles.includes(session.rol))) continue;
+                html += `<div class="nav-section"><div class="nav-section-title">${m.section}</div></div>`;
+                continue;
+            }
+            if (!m.roles.includes(session.rol)) continue;
+            html += `<button class="nav-item" data-sec="${m.id}" onclick="navigateTo('${m.id}')"><i data-lucide="${m.icon}"></i><span>${m.label}</span></button>`;
+        }
+        nav.innerHTML = html;
+        lucide.createIcons();
+    }
+
+    // Operacion es solo-lectura para admins: unicamente el recepcionista crea/edita.
+    function applyOperacionPermissions() {
+        const canOperate = session.rol === 'recepcionista';
+        ['cardRegistrarPago', 'cardRegistrarVenta', 'wrapGenerarCorte', 'btnAddCliente'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = canOperate ? '' : 'none';
+        });
+    }
+
+    const TITLES = { dashboard: 'Dashboard', pagos: 'Pagos de Membresias', clientes: 'Clientes', membresias: 'Tipos de Membresia', asistencias: 'Asistencias', productos: 'Inventario', ventas: 'Punto de Venta', corte: 'Corte de Caja', sucursales: 'Sucursales', usuarios: 'Usuarios del Sistema', reportes: 'Reportes', kiosko: 'Kiosko / Actuadores' };
+
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('backdrop').classList.toggle('visible');
+    }
+
+    function navigateTo(sec) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        const el = document.getElementById('sec-' + sec);
+        if (el) el.classList.add('active');
+        const btn = document.querySelector(`.nav-item[data-sec="${sec}"]`);
+        if (btn) btn.classList.add('active');
+        document.getElementById('pageTitle').textContent = TITLES[sec] || sec;
+        loadSection(sec);
+        // en movil, cerrar el menu al elegir una opcion
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('backdrop').classList.remove('visible');
+    }
+
+    function loadSection(sec) {
+        switch (sec) {
+            case 'dashboard': loadDashboard(); break;
+            case 'pagos': loadPagos(); break;
+            case 'clientes': loadClientes(); break;
+            case 'membresias': loadMembresias(); break;
+            case 'asistencias': loadAsistencias(); break;
+            case 'productos': loadProductos(); break;
+            case 'ventas': loadVentas(); break;
+            case 'corte': loadCortes(); break;
+            case 'sucursales': loadSucursales(); break;
+            case 'usuarios': loadUsuarios(); break;
+            case 'reportes': setupReportes(); break;
+            case 'kiosko': loadKiosko(); break;
+        }
+    }
+
+    // ========== KIOSKO / ACTUADORES ==========
+    async function loadKiosko() {
+        const row = document.getElementById('kioskoSucRow');
+        const sel = document.getElementById('kioskoSuc');
+        // Solo el admin general elige sucursal; los demas mandan a la suya (el backend lo fuerza).
+        if (session.rol === 'admin_general') {
+            row.style.display = '';
+            if (!sucursalesCache.length) sucursalesCache = await api('sucursales');
+            sel.innerHTML = sucursalesCache.map(s => `<option value="${s.id}">${esc(s.nombre)}</option>`).join('');
+        } else {
+            row.style.display = 'none';
+        }
+        const btns = [
+            { act: 'led_verde', est: 'pulso', label: 'LED verde (pulso)', cls: 'btn-primary' },
+            { act: 'led_rojo', est: 'pulso', label: 'LED rojo (pulso)', cls: 'btn-primary' },
+            { act: 'buzzer', est: 'pulso', label: 'Buzzer (pitido)', cls: 'btn-primary' },
+            { act: 'led_verde', est: 'on', label: 'Verde ON', cls: 'btn-secondary' },
+            { act: 'led_verde', est: 'off', label: 'Verde OFF', cls: 'btn-secondary' },
+            { act: 'led_rojo', est: 'on', label: 'Rojo ON', cls: 'btn-secondary' },
+            { act: 'led_rojo', est: 'off', label: 'Rojo OFF', cls: 'btn-secondary' },
+        ];
+        document.getElementById('kioskoBtns').innerHTML = btns.map((b, i) =>
+            `<button class="${b.cls}" onclick="enviarActuador(${i})">${b.label}</button>`).join('');
+        window._kioskoBtns = btns;
+        document.getElementById('kioskoMsg').textContent = '';
+    }
+
+    async function enviarActuador(i) {
+        const b = window._kioskoBtns[i];
+        const idSucursal = session.rol === 'admin_general'
+            ? parseInt(document.getElementById('kioskoSuc').value || '1') : 0;
+        try {
+            await apiCreate('actuadores/comando', { idSucursal, actuador: b.act, estado: b.est });
+            document.getElementById('kioskoMsg').textContent = `Comando enviado: ${b.act} -> ${b.est}`;
+            showToast('Comando enviado al kiosko', 'success');
+        } catch (e) {
+            showToast('Error: ' + e.message, 'error');
+        }
+    }
+
+    // ========== DASHBOARD ==========
+    async function loadDashboard() {
+        try {
+            const r = await fetch(`${API}/reportes/dashboard`, { headers: authHeaders() });
+            const d = await r.json();
+            document.getElementById('dashStats').innerHTML = `
+                <div class="stat-card"><div class="stat-icon teal"><i data-lucide="users"></i></div><div class="stat-info"><h3>${d.totalClientes}</h3><p>Clientes activos</p></div></div>
+                <div class="stat-card"><div class="stat-icon orange"><i data-lucide="clipboard-check"></i></div><div class="stat-info"><h3>${d.asistenciasHoy}</h3><p>Asistencias hoy</p></div></div>
+                <div class="stat-card"><div class="stat-icon green"><i data-lucide="dollar-sign"></i></div><div class="stat-info"><h3>${fmt$(d.ingresosMes)}</h3><p>Ingresos del mes</p></div></div>
+                <div class="stat-card"><div class="stat-icon blue"><i data-lucide="shopping-bag"></i></div><div class="stat-info"><h3>${fmt$(d.ventasMes)}</h3><p>Ventas del mes</p></div></div>`;
+            lucide.createIcons();
+
+            const pagos = await api('pagos');
+            const recent = pagos.slice(0, 5);
+            document.getElementById('dashRecentPagos').innerHTML = recent.length ? recent.map(p => `<tr><td>${fmtDate(p.fecha)}</td><td>${esc(p.cliente || '')}</td><td>${esc(p.membresia || '')}</td><td class="td-monto">${fmt$(p.monto)}</td><td>${metodoBadge(p.metodo || '')}</td></tr>`).join('') : '<tr><td colspan="5" class="empty-state">Sin pagos registrados</td></tr>';
+        } catch (e) { showToast('Error cargando dashboard: ' + e.message, 'error'); }
+    }
+
+    // ========== PAGOS ==========
+    async function loadPagos() {
+        try {
+            const [pagos, clientes, membresias] = await Promise.all([api('pagos'), api('clientes'), api('membresias')]);
+            clientesCache = clientes;
+            membresiasCache = membresias;
+
+            document.getElementById('pagoCliente').innerHTML = '<option value="">Seleccionar cliente...</option>' + clientesCache.filter(c => c.estatus === 'activo').map(c => `<option value="${c.id}">${esc(c.nombre)}</option>`).join('');
+            document.getElementById('pagoMembresia').innerHTML = '<option value="">Seleccionar...</option>' + membresias.filter(m => m.estatus === 'activa').map(m => `<option value="${m.id}" data-precio="${m.precio}">${esc(m.nombre)} - ${fmt$(m.precio)}</option>`).join('');
+
+            document.getElementById('pagosTable').innerHTML = pagos.length ? pagos.map(p => `<tr><td>${fmtDate(p.fecha)}</td><td>${esc(p.cliente || '')}</td><td>${esc(p.membresia || '')}</td><td class="td-monto">${fmt$(p.monto)}</td><td>${metodoBadge(p.metodo || '')}</td><td>${esc(p.recepcionista || '')}</td></tr>`).join('') : '<tr><td colspan="6" class="empty-state">Sin pagos registrados</td></tr>';
+        } catch (e) { showToast('Error: ' + e.message, 'error'); }
+    }
+
+    function updatePagoMonto() {
+        const opt = document.getElementById('pagoMembresia').selectedOptions[0];
+        if (opt?.dataset.precio) document.getElementById('pagoMonto').value = opt.dataset.precio;
+    }
+
+    async function registrarPago(e) {
+        e.preventDefault();
+        try {
+            await apiCreate('pagos', {
+                idCliente: Number(document.getElementById('pagoCliente').value),
+                idMembresia: Number(document.getElementById('pagoMembresia').value),
+                monto: Number(document.getElementById('pagoMonto').value),
+                metodo: document.getElementById('pagoMetodo').value,
+                idRecepcionista: session.id,
+                idSucursal: session.idSucursal
+            });
+            showToast('Pago registrado correctamente');
+            document.getElementById('pagoForm').reset();
+            loadPagos();
+        } catch (e) { showToast('Error: ' + e.message, 'error'); }
+    }
+
+    // ========== CLIENTES ==========
+    async function loadClientes() {
+        try {
+            const search = (document.getElementById('clienteSearch')?.value || '').toLowerCase();
+            const clientes = await api('clientes');
+            clientesCache = clientes;
+            let filtered = clientesCache;
+            if (search) filtered = filtered.filter(c => (c.nombre || '').toLowerCase().includes(search));
+
+            document.getElementById('clientesTable').innerHTML = filtered.length ? filtered.map(c => {
+                const nfcBadge = c.uidNfc ? `<span style="color:#0d9488;font-size:0.8rem">${esc(c.uidNfc.substring(0, 8))}...</span>` : '<span style="color:#94a3b8;font-size:0.8rem">Sin asignar</span>';
+                const estatusBadge = c.estatus === 'activo' ? '<span style="color:#059669">Activo</span>' : '<span style="color:#ef4444">Inactivo</span>';
+                const vigBadge = c.vigente ? '<span style="color:#059669;font-size:0.75rem">Vigente</span>' : (c.vigencia ? '<span style="color:#ef4444;font-size:0.75rem">Vencida</span>' : '');
+                const canOp = session.rol === 'recepcionista';
+                const nfcBtn = !canOp ? '' : (c.uidNfc
+                    ? `<button class="btn-secondary" onclick="openNfcModal(${c.id})" style="padding:0.3rem 0.6rem;font-size:0.8rem;color:#f59e0b;border-color:#f59e0b">Reasignar NFC</button>`
+                    : `<button class="btn-secondary" onclick="openNfcModal(${c.id})" style="padding:0.3rem 0.6rem;font-size:0.8rem;color:#0d9488;border-color:#0d9488">Asignar NFC</button>`);
+                const editBtn = !canOp ? '' : `<button class="btn-secondary" onclick="editCliente(${c.id})" style="padding:0.3rem 0.6rem;font-size:0.8rem">Editar</button>`;
+                const acciones = canOp ? `<div style="display:flex;gap:0.4rem">${nfcBtn}${editBtn}</div>` : '<span style="color:#94a3b8;font-size:0.8rem">Solo lectura</span>';
+                return `<tr><td>${esc(c.nombre)} ${vigBadge}</td><td>${esc(c.telefono || '-')}</td><td>${esc(c.email || '-')}</td><td>${nfcBadge}</td><td>${estatusBadge}</td><td>${acciones}</td></tr>`;
+            }).join('') : '<tr><td colspan="6" class="empty-state">Sin clientes</td></tr>';
+        } catch (e) { showToast('Error: ' + e.message, 'error'); }
+    }
+    function debouncedClienteSearch() { clearTimeout(searchTimeout); searchTimeout = setTimeout(loadClientes, 300); }
+
+    function openClienteModal(data) {
+        document.getElementById('clienteModalTitle').textContent = data ? 'Editar Cliente' : 'Nuevo Cliente';
+        document.getElementById('cliNombre').value = data?.nombre || '';
+        document.getElementById('cliTelefono').value = data?.telefono || '';
+        document.getElementById('cliEmail').value = data?.email || '';
+        document.getElementById('cliEditId').value = data?.id || '';
+        document.getElementById('modalCliente').classList.add('active');
+    }
+    function editCliente(id) { const c = clientesCache.find(x => x.id === id); if (c) openClienteModal(c); }
+
+    async function saveCliente(e) {
+        e.preventDefault();
+        try {
+            const editId = document.getElementById('cliEditId').value;
+            const data = {
+                nombre: document.getElementById('cliNombre').value.trim(),
+                telefono: document.getElementById('cliTelefono').value.trim(),
+                email: document.getElementById('cliEmail').value.trim(),
+                idSucursal: session.idSucursal,
+                estatus: 'activo',
+                estatusNfc: 'sin_asignar'
+            };
+            if (editId) await apiUpdate('clientes', editId, data);
+            else await apiCreate('clientes', data);
+            showToast(editId ? 'Cliente actualizado' : 'Cliente registrado');
+            closeModal('modalCliente');
+            loadClientes();
+        } catch (e) { showToast('Error: ' + e.message, 'error'); }
+    }
+
+    // ========== NFC ==========
+    let nfcPollTimer = null;
+    let nfcLastKnown = {};
+    let nfcReady = false;
+
+    function openNfcModal(cid) {
+        const c = clientesCache.find(x => x.id === cid);
+        if (!c) return;
+        document.getElementById('nfcModalTitle').textContent = c.uidNfc ? 'Reasignar Llavero NFC' : 'Asignar Llavero NFC';
+        document.getElementById('nfcClienteLabel').textContent = 'Cliente: ' + c.nombre;
+        document.getElementById('nfcUid').value = '';
+        document.getElementById('nfcClienteId').value = c.id;
+        document.getElementById('nfcScanArea').style.display = '';
+        document.getElementById('nfcDetected').style.display = 'none';
+        document.getElementById('btnSaveNfc').disabled = true;
+        document.getElementById('btnSaveNfc').style.opacity = '0.5';
+        document.getElementById('nfcStatusText').textContent = 'Esperando llavero...';
+        document.getElementById('modalNfc').classList.add('active');
+        nfcLastKnown = {};
+        nfcReady = false;
+        lucide.createIcons();
+        initNfcPolling();
+    }
+
+    function closeNfcModal() { stopNfcPolling(); closeModal('modalNfc'); }
+
+    async function initNfcPolling() {
+        stopNfcPolling();
+        try {
+            const lecturas = await api('nfclecturas');
+            lecturas.forEach(l => { nfcLastKnown[l.uid] = l.timestamp; });
+        } catch (e) { }
+        nfcReady = true;
+        nfcPollTimer = setInterval(pollNfcReader, 1500);
+    }
+
+    function stopNfcPolling() { if (nfcPollTimer) { clearInterval(nfcPollTimer); nfcPollTimer = null; } }
+
+    async function pollNfcReader() {
+        if (!nfcReady) return;
+        try {
+            const lecturas = await api('nfclecturas');
+            if (!lecturas.length) return;
+            const changed = lecturas.find(l => nfcLastKnown[l.uid] !== l.timestamp);
+            if (!changed) return;
+            stopNfcPolling();
+            lecturas.forEach(l => { nfcLastKnown[l.uid] = l.timestamp; });
+            document.getElementById('nfcUid').value = changed.uid;
+            document.getElementById('nfcScanArea').style.display = 'none';
+            document.getElementById('nfcDetected').style.display = '';
+            document.getElementById('nfcDetectedUid').textContent = changed.uid;
+            document.getElementById('btnSaveNfc').disabled = false;
+            document.getElementById('btnSaveNfc').style.opacity = '1';
+        } catch (e) { }
+    }
+
+    async function saveNfc(e) {
+        e.preventDefault();
+        try {
+            const cid = Number(document.getElementById('nfcClienteId').value);
+            const uid = document.getElementById('nfcUid').value.trim().toUpperCase();
+            if (!uid) { showToast('Aun no se ha detectado un llavero', 'error'); return; }
+            const dupes = clientesCache.filter(c => c.uidNfc === uid && c.id !== cid);
+            if (dupes.length) { showToast('Ese llavero ya esta asignado a ' + dupes[0].nombre, 'error'); return; }
+            const c = clientesCache.find(x => x.id === cid);
+            if (!c) { showToast('Cliente no encontrado', 'error'); return; }
+            await apiUpdate('clientes', cid, { ...c, uidNfc: uid, estatusNfc: 'activo' });
+            showToast('Llavero NFC asignado a ' + c.nombre);
+            closeNfcModal();
+            loadClientes();
+        } catch (e) { showToast('Error: ' + e.message, 'error'); }
+    }
+
+    // ========== MEMBRESIAS ==========
+    async function loadMembresias() {
+        try {
+            const mems = await api('membresias');
+            membresiasCache = mems;
+            const canEdit = session.rol === 'admin_general';
+            document.getElementById('btnAddMem').style.display = canEdit ? '' : 'none';
+            document.getElementById('membresiasTable').innerHTML = mems.length ? mems.map(m => {
+                const est = m.estatus === 'activa' ? '<span style="color:#059669">Activa</span>' : '<span style="color:#ef4444">Inactiva</span>';
+                const act = canEdit ? `<button class="btn-secondary" onclick="editMembresia(${m.id})" style="padding:0.3rem 0.6rem;font-size:0.8rem">Editar</button>` : '';
+                return `<tr><td>${esc(m.nombre)}</td><td class="td-monto">${fmt$(m.precio)}</td><td>${m.duracionDias} dias</td><td>${est}</td><td>${act}</td></tr>`;
+            }).join('') : '<tr><td colspan="5" class="empty-state">Sin membresias</td></tr>';
+        } catch (e) { showToast('Error: ' + e.message, 'error'); }
+    }
+    function openMembresiaModal(d) {
+        document.getElementById('memModalTitle').textContent = d ? 'Editar Membresia' : 'Nueva Membresia';
+        document.getElementById('memNombre').value = d?.nombre || ''; document.getElementById('memPrecio').value = d?.precio || '';
+        document.getElementById('memDias').value = d?.duracionDias || ''; document.getElementById('memDesc').value = d?.descripcion || '';
+        document.getElementById('memEditId').value = d?.id || '';
+        document.getElementById('modalMembresia').classList.add('active');
+    }
+    function editMembresia(id) { const m = membresiasCache.find(x => x.id === id); if (m) openMembresiaModal(m); }
+    async function saveMembresia(e) {
+        e.preventDefault();
+        try {
+            const editId = document.getElementById('memEditId').value;
+            const d = { nombre: document.getElementById('memNombre').value.trim(), precio: Number(document.getElementById('memPrecio').value), duracionDias: Number(document.getElementById('memDias').value), descripcion: document.getElementById('memDesc').value.trim(), estatus: 'activa' };
+            if (editId) await apiUpdate('membresias', editId, d); else await apiCreate('membresias', d);
+            showToast(editId ? 'Membresia actualizada' : 'Membresia creada');
+            closeModal('modalMembresia'); loadMembresias();
+        } catch (e) { showToast('Error: ' + e.message, 'error'); }
+    }
+
+    // ========== ASISTENCIAS ==========
+    async function loadAsistencias() {
+        try {
+            const asist = await api('asistencias');
+            const dateFilter = document.getElementById('asistFecha')?.value || '';
+            const search = (document.getElementById('asistSearch')?.value || '').toLowerCase();
+            let filtered = asist;
+            if (dateFilter) filtered = filtered.filter(a => (a.fechaHora || '').startsWith(dateFilter));
+            if (search) filtered = filtered.filter(a => (a.cliente || '').toLowerCase().includes(search));
+
+            document.getElementById('asistenciasTable').innerHTML = filtered.length ? filtered.map(a => {
+                const hora = a.fechaHora ? new Date(a.fechaHora).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }) : '-';
+                return `<tr><td>${hora}</td><td>${esc(a.cliente || '')}</td><td>${esc(a.metodo || '')}</td><td style="color:#64748b;font-size:0.85rem">${esc(a.uidNfc || '-')}</td></tr>`;
+            }).join('') : '<tr><td colspan="4" class="empty-state">Sin asistencias</td></tr>';
+        } catch (e) { showToast('Error: ' + e.message, 'error'); }
+    }
+
+    // ========== INVENTARIO ==========
+    const CATEGORIAS = ['Bebidas', 'Suplementos', 'Snacks', 'Accesorios', 'Ropa', 'Equipo', 'Otros'];
+
+    async function loadProductos() {
+        try {
+            const prods = await api('productos');
+            productosCache = prods;
+            const canManage = session.rol === 'admin_general';        // crear/editar/borrar producto
+            const canMove = session.rol === 'admin_sucursal';         // entradas/bajas (solo el de sede)
+            document.getElementById('btnAddProd').style.display = canManage ? '' : 'none';
+            document.getElementById('productosTable').innerHTML = productosCache.length ? productosCache.map(p => {
+                const stockColor = p.stock <= 0 ? '#ef4444' : p.stock <= 5 ? '#f59e0b' : '#059669';
+                let btns = '';
+                if (canMove) {
+                    btns += `<button class="btn-secondary" onclick="openMovimientoModal(${p.id},'entrada')" style="padding:0.3rem 0.6rem;font-size:0.8rem;color:#059669;border-color:#059669">+ Entrada</button>`;
+                    btns += `<button class="btn-secondary" onclick="openMovimientoModal(${p.id},'baja')" style="padding:0.3rem 0.6rem;font-size:0.8rem;color:#ef4444;border-color:#ef4444">- Baja</button>`;
+                }
+                btns += `<button class="btn-secondary" onclick="openStockModal(${p.id})" style="padding:0.3rem 0.6rem;font-size:0.8rem;color:#0d9488;border-color:#0d9488">Ver stock</button>`;
+                btns += `<button class="btn-secondary" onclick="openMovimientosHist(${p.id})" style="padding:0.3rem 0.6rem;font-size:0.8rem">Movs.</button>`;
+                if (canManage) {
+                    btns += `<button class="btn-secondary" onclick="editProducto(${p.id})" style="padding:0.3rem 0.6rem;font-size:0.8rem">Editar</button>`;
+                    btns += `<button class="btn-secondary" onclick="deleteProducto(${p.id})" style="padding:0.3rem 0.6rem;font-size:0.8rem;color:#ef4444;border-color:#ef4444">Eliminar</button>`;
+                }
+                const stockTxt = session.rol === 'admin_general' ? p.stock + ' (todas)' : p.stock;
+                return `<tr><td>${esc(p.nombre)}</td><td class="td-monto">${fmt$(p.precio)}</td><td style="color:${stockColor};font-weight:600">${stockTxt}</td><td>${esc(p.categoria || '-')}</td><td><div style="display:flex;gap:0.4rem;flex-wrap:wrap">${btns}</div></td></tr>`;
+            }).join('') : '<tr><td colspan="5" class="empty-state">Sin productos</td></tr>';
+        } catch (e) { showToast('Error: ' + e.message, 'error'); }
+    }
+    function openProductoModal(d) {
+        document.getElementById('prodModalTitle').textContent = d ? 'Editar Producto' : 'Nuevo Producto';
+        document.getElementById('prodNombre').value = d?.nombre || '';
+        document.getElementById('prodPrecio').value = d?.precio || '';
+        document.getElementById('prodEditId').value = d?.id || '';
+        document.getElementById('prodCategoria').innerHTML = CATEGORIAS.map(c => `<option value="${c}">${c}</option>`).join('');
+        document.getElementById('prodCategoria').value = d?.categoria || CATEGORIAS[0];
+        document.getElementById('modalProducto').classList.add('active');
+    }
+    function editProducto(id) { const p = productosCache.find(x => x.id === id); if (p) openProductoModal(p); }
+    async function saveProducto(e) {
+        e.preventDefault();
+        try {
+            const editId = document.getElementById('prodEditId').value;
+            const d = { nombre: document.getElementById('prodNombre').value.trim(), precio: Number(document.getElementById('prodPrecio').value), categoria: document.getElementById('prodCategoria').value, estatus: 'activo' };
+            if (editId) await apiUpdate('productos', editId, d); else await apiCreate('productos', d);
+            showToast(editId ? 'Producto actualizado' : 'Producto guardado');
+            closeModal('modalProducto'); loadProductos();
+        } catch (e) { showToast('Error: ' + e.message, 'error'); }
+    }
+    async function openStockModal(prodId) {
+        try {
+            const p = productosCache.find(x => x.id === prodId);
+            const r = await fetch(`${API}/productos/${prodId}/stock`, { headers: authHeaders() });
+            if (r.status === 401) { logout(); return; }
+            const d = await r.json();
+            const items = d.items || [];
+            document.getElementById('stockModalTitle').textContent = 'Stock por sucursal' + (p ? ' - ' + p.nombre : '');
+            document.getElementById('stockBody').innerHTML = items.length ? items.map(s => {
+                const col = s.stock <= 0 ? '#ef4444' : s.stock <= 5 ? '#f59e0b' : '#059669';
+                return `<tr><td>${esc(s.sucursal || ('Suc ' + s.idSucursal))}</td><td style="color:${col};font-weight:600">${s.stock}</td></tr>`;
+            }).join('') : '<tr><td colspan="2" class="empty-state">Sin datos</td></tr>';
+            document.getElementById('stockModal').classList.add('active');
+        } catch (e) { showToast('Error: ' + e.message, 'error'); }
+    }
+    async function deleteProducto(id) {
+        if (!confirm('Eliminar este producto y su historial de movimientos?')) return;
+        try { await apiDelete('productos', id); showToast('Producto eliminado'); loadProductos(); }
+        catch (e) { showToast('Error: ' + e.message, 'error'); }
+    }
+    function openMovimientoModal(prodId, tipo) {
+        const p = productosCache.find(x => x.id === prodId);
+        document.getElementById('movProdId').value = prodId;
+        document.getElementById('movTipo').value = tipo;
+        document.getElementById('movModalTitle').textContent = (tipo === 'entrada' ? 'Entrada de stock' : 'Baja de stock') + (p ? ' - ' + p.nombre : '');
+        document.getElementById('movCantidad').value = '';
+        document.getElementById('movMotivo').value = '';
+        document.getElementById('movModal').classList.add('active');
+    }
+    async function saveMovimiento(e) {
+        e.preventDefault();
+        try {
+            const d = { idProducto: Number(document.getElementById('movProdId').value), tipo: document.getElementById('movTipo').value, cantidad: Number(document.getElementById('movCantidad').value), motivo: document.getElementById('movMotivo').value.trim() };
+            const r = await fetch(`${API}/movimientos`, { method: 'POST', headers: authHeaders(), body: JSON.stringify(d) });
+            if (r.status === 401) { logout(); return; }
+            const j = await r.json();
+            if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`);
+            showToast('Movimiento registrado');
+            closeModal('movModal'); loadProductos();
+        } catch (e) { showToast('Error: ' + e.message, 'error'); }
+    }
+    async function openMovimientosHist(prodId) {
+        try {
+            const r = await fetch(`${API}/movimientos?idProducto=${prodId}`, { headers: authHeaders() });
+            if (r.status === 401) { logout(); return; }
+            const d = await r.json();
+            const items = d.items || [];
+            const rolL = { entrada: '<span style="color:#059669">Entrada</span>', baja: '<span style="color:#ef4444">Baja</span>', venta: '<span style="color:#f59e0b">Venta</span>' };
+            document.getElementById('histBody').innerHTML = items.length ? items.map(m => `<tr><td>${fmtDate(m.fecha)}</td><td>${rolL[m.tipo] || m.tipo}</td><td>${m.cantidad}</td><td>${esc(m.motivo || '-')}</td></tr>`).join('') : '<tr><td colspan="4" class="empty-state">Sin movimientos</td></tr>';
+            document.getElementById('histModal').classList.add('active');
+        } catch (e) { showToast('Error: ' + e.message, 'error'); }
+    }
+
+    // ========== VENTAS ==========
+    let ventaCarrito = [];
+
+    async function loadVentas() {
+        try {
+            const [ventas, prods] = await Promise.all([api('ventas'), api('productos')]);
+            productosCache = prods;
+            document.getElementById('ventaProducto').innerHTML = '<option value="">Seleccionar...</option>' + productosCache.filter(p => p.stock > 0).map(p => `<option value="${p.id}" data-precio="${p.precio}" data-stock="${p.stock}">${esc(p.nombre)} - ${fmt$(p.precio)} (Stock: ${p.stock})</option>`).join('');
+            renderCarrito();
+
+            document.getElementById('ventasTable').innerHTML = ventas.length ? ventas.map(v => `<tr><td>${fmtDate(v.fecha)}</td><td>${esc(v.producto || '')}</td><td>${v.cantidad}</td><td class="td-monto">${fmt$(v.total)}</td><td>${metodoBadge(v.metodo || '')}</td><td>${esc(v.recepcionista || '')}</td></tr>`).join('') : '<tr><td colspan="6" class="empty-state">Sin ventas</td></tr>';
+        } catch (e) { showToast('Error: ' + e.message, 'error'); }
+    }
+    function updateVentaPrecio() {
+        const o = document.getElementById('ventaProducto').selectedOptions[0];
+        document.getElementById('ventaTotal').value = o?.dataset.precio
+            ? (Number(o.dataset.precio) * Number(document.getElementById('ventaCantidad').value || 1)).toFixed(2)
+            : '';
+    }
+    function updateVentaTotal() { updateVentaPrecio(); }
+
+    function agregarAlCarrito(e) {
+        e.preventDefault();
+        const idProducto = Number(document.getElementById('ventaProducto').value);
+        const cantidad = Number(document.getElementById('ventaCantidad').value || 0);
+        if (!idProducto || cantidad <= 0) return showToast('Selecciona un producto y cantidad válida', 'error');
+
+        const prod = productosCache.find(p => p.id === idProducto);
+        if (!prod) return;
+
+        const existente = ventaCarrito.find(item => item.idProducto === idProducto);
+        const nuevaCantidad = (existente ? existente.cantidad : 0) + cantidad;
+        if (nuevaCantidad > prod.stock) {
+            return showToast(`Stock insuficiente para ${prod.nombre} (disponible: ${prod.stock})`, 'error');
+        }
+
+        if (existente) {
+            existente.cantidad = nuevaCantidad;
+        } else {
+            ventaCarrito.push({ idProducto: prod.id, nombre: prod.nombre, precio: Number(prod.precio), stock: prod.stock, cantidad });
+        }
+        document.getElementById('ventaProducto').value = '';
+        document.getElementById('ventaCantidad').value = 1;
+        document.getElementById('ventaTotal').value = '';
+        renderCarrito();
+    }
+
+    function cambiarCantidadCarrito(idx, delta) {
+        const item = ventaCarrito[idx];
+        if (!item) return;
+        const next = item.cantidad + delta;
+        if (next <= 0) {
+            ventaCarrito.splice(idx, 1);
+        } else if (next > item.stock) {
+            return showToast(`Stock máximo disponible: ${item.stock}`, 'error');
+        } else {
+            item.cantidad = next;
+        }
+        renderCarrito();
+    }
+
+    function quitarDelCarrito(idx) {
+        ventaCarrito.splice(idx, 1);
+        renderCarrito();
+    }
+
+    function vaciarCarrito() {
+        ventaCarrito = [];
+        renderCarrito();
+    }
+
+    function renderCarrito() {
+        const wrap = document.getElementById('ventaCarritoWrap');
+        const body = document.getElementById('ventaCarritoBody');
+        if (!ventaCarrito.length) {
+            wrap.style.display = 'none';
+            body.innerHTML = '';
+            document.getElementById('ventaCarritoTotal').textContent = '$0.00';
+            return;
+        }
+        wrap.style.display = 'block';
+        let total = 0;
+        body.innerHTML = ventaCarrito.map((item, idx) => {
+            const sub = item.precio * item.cantidad;
+            total += sub;
+            return `<tr>
+                <td>${esc(item.nombre)}</td>
+                <td>${fmt$(item.precio)}</td>
+                <td>
+                    <button type="button" class="btn-secondary" style="padding:0.15rem 0.5rem" onclick="cambiarCantidadCarrito(${idx}, -1)">-</button>
+                    <span style="margin:0 0.5rem">${item.cantidad}</span>
+                    <button type="button" class="btn-secondary" style="padding:0.15rem 0.5rem" onclick="cambiarCantidadCarrito(${idx}, 1)">+</button>
+                </td>
+                <td class="td-monto">${fmt$(sub)}</td>
+                <td><button type="button" class="btn-danger" style="padding:0.2rem 0.6rem" onclick="quitarDelCarrito(${idx})">Quitar</button></td>
+            </tr>`;
+        }).join('');
+        document.getElementById('ventaCarritoTotal').textContent = fmt$(total);
+    }
+
+    async function registrarVenta() {
+        if (!ventaCarrito.length) return showToast('Agrega al menos un producto al carrito', 'error');
+        try {
+            await apiCreate('ventas/lote', {
+                items: ventaCarrito.map(i => ({ idProducto: i.idProducto, cantidad: i.cantidad })),
+                metodo: document.getElementById('ventaMetodo').value,
+                idRecepcionista: session.id,
+                idSucursal: session.idSucursal
+            });
+            showToast(`Venta registrada (${ventaCarrito.length} producto(s))`);
+            ventaCarrito = [];
+            document.getElementById('ventaForm').reset();
+            loadVentas();
+        } catch (e) { showToast('Error: ' + e.message, 'error'); }
+    }
+
+    // ========== CORTE DE CAJA ==========
+    async function loadCortes() {
+        try {
+            const cortes = await api('cortescaja');
+            document.getElementById('corteStats').innerHTML = '';
+
+            document.getElementById('cortesTable').innerHTML = cortes.length ? cortes.map(c => {
+                const est = c.estatus === 'abierto' ? '<span style="color:#f59e0b">Abierto</span>' : '<span style="color:#059669">Cerrado</span>';
+                return `<tr><td>${fmtDate(c.fechaApertura)}</td><td>${esc(c.recepcionista || '')}</td><td class="td-monto">${fmt$(c.totalMembresias)}</td><td>${fmt$(c.totalProductos)}</td><td>${fmt$(c.totalEfectivo)}</td><td>${fmt$(c.totalTarjeta)}</td><td class="td-monto">${fmt$(c.totalGeneral)}</td><td>${est}</td></tr>`;
+            }).join('') : '<tr><td colspan="8" class="empty-state">Sin cortes</td></tr>';
+        } catch (e) { showToast('Error: ' + e.message, 'error'); }
+    }
+
+    async function generarCorte() {
+        try {
+            const corte = await apiCreate('cortescaja', {
+                idRecepcionista: session.id,
+                idSucursal: session.idSucursal
+            });
+            const cerrado = await fetch(`${API}/cortescaja/${corte.id}/cerrar`, { method: 'PUT', headers: authHeaders() });
+            if (cerrado.ok) {
+                showToast('Corte generado correctamente');
+            }
+            loadCortes();
+        } catch (e) { showToast('Error: ' + e.message, 'error'); }
+    }
+
+    // ========== SUCURSALES ==========
+    async function loadSucursales() {
+        try {
+            const sucs = await api('sucursales');
+            sucursalesCache = sucs;
+            document.getElementById('sucursalesTable').innerHTML = sucs.length ? sucs.map(s => {
+                const est = s.estatus === 'activa' ? '<span style="color:#059669">Activa</span>' : '<span style="color:#ef4444">Inactiva</span>';
+                return `<tr><td>${esc(s.nombre)}</td><td>${esc(s.direccion || '-')}</td><td>${esc(s.telefono || '-')}</td><td>${est}</td><td><button class="btn-secondary" onclick="editSucursal(${s.id})" style="padding:0.3rem 0.6rem;font-size:0.8rem">Editar</button></td></tr>`;
+            }).join('') : '<tr><td colspan="5" class="empty-state">Sin sucursales</td></tr>';
+        } catch (e) { showToast('Error: ' + e.message, 'error'); }
+    }
+    function openSucursalModal(d) {
+        document.getElementById('sucNombre').value = d?.nombre || ''; document.getElementById('sucDireccion').value = d?.direccion || '';
+        document.getElementById('sucTelefono').value = d?.telefono || ''; document.getElementById('sucEditId').value = d?.id || '';
+        document.getElementById('modalSucursal').classList.add('active');
+    }
+    function editSucursal(id) { const s = sucursalesCache.find(x => x.id === id); if (s) openSucursalModal(s); }
+    async function saveSucursal(e) {
+        e.preventDefault();
+        try {
+            const editId = document.getElementById('sucEditId').value;
+            const d = { nombre: document.getElementById('sucNombre').value.trim(), direccion: document.getElementById('sucDireccion').value.trim(), telefono: document.getElementById('sucTelefono').value.trim(), estatus: 'activa' };
+            if (editId) await apiUpdate('sucursales', editId, d); else await apiCreate('sucursales', d);
+            showToast(editId ? 'Sucursal actualizada' : 'Sucursal creada');
+            closeModal('modalSucursal'); loadSucursales();
+        } catch (e) { showToast('Error: ' + e.message, 'error'); }
+    }
+
+    // ========== USUARIOS ==========
+    async function loadUsuarios() {
+        try {
+            const [users, sucs] = await Promise.all([api('usuarios'), api('sucursales')]);
+            sucursalesCache = sucs;
+            const rolLabels = { admin_general: 'Admin General', admin_sucursal: 'Admin Sucursal', recepcionista: 'Recepcionista', kiosko: 'Kiosco de entrada' };
+
+            document.getElementById('usuariosTable').innerHTML = users.length ? users.map(u => {
+                const est = u.estatus === 'activo' ? '<span style="color:#059669">Activo</span>' : '<span style="color:#ef4444">Inactivo</span>';
+                return `<tr><td>${esc(u.nombre)}</td><td>${esc(u.email)}</td><td>${rolLabels[u.rol] || u.rol}</td><td>${esc(u.sucursal || 'Todas')}</td><td>${est}</td><td><button class="btn-secondary" onclick="editUsuario(${u.id})" style="padding:0.3rem 0.6rem;font-size:0.8rem">Editar</button></td></tr>`;
+            }).join('') : '<tr><td colspan="6" class="empty-state">Sin usuarios</td></tr>';
+
+            document.getElementById('usrSucursal').innerHTML = '<option value="">Sin asignar</option>' + sucs.map(s => `<option value="${s.id}">${esc(s.nombre)}</option>`).join('');
+        } catch (e) { showToast('Error: ' + e.message, 'error'); }
+    }
+    function toggleUsrSucursal() {
+        document.getElementById('usrSucursalGroup').style.display = document.getElementById('usrRol').value === 'admin_general' ? 'none' : '';
+    }
+    function openUsuarioModal(d) {
+        document.getElementById('usrModalTitle').textContent = d ? 'Editar Usuario' : 'Nuevo Usuario';
+        document.getElementById('usrNombre').value = d?.nombre || '';
+        document.getElementById('usrEmail').value = d?.email || '';
+        document.getElementById('usrPassword').value = '';
+        document.getElementById('usrEditId').value = d?.id || '';
+        document.getElementById('usrEmail').disabled = !!d;
+        document.getElementById('usrRol').value = d?.rol || 'recepcionista';
+        document.getElementById('usrSucursal').value = d?.idSucursal || '';
+        // Alcance por sede: el admin de sucursal no crea admin_general ni cambia de sede
+        if (session.rol === 'admin_sucursal') {
+            const optG = document.querySelector('#usrRol option[value="admin_general"]');
+            if (optG) optG.remove();
+            if (document.getElementById('usrRol').value === 'admin_general') document.getElementById('usrRol').value = 'recepcionista';
+            const usrSuc = document.getElementById('usrSucursal');
+            usrSuc.value = session.idSucursal || '';
+            usrSuc.disabled = true;
+        }
+        toggleUsrSucursal();
+        document.getElementById('modalUsuario').classList.add('active');
+    }
+    async function editUsuario(id) {
+        const users = await api('usuarios');
+        const u = users.find(x => x.id === id);
+        if (u) openUsuarioModal(u);
+    }
+    async function saveUsuario(e) {
+        e.preventDefault();
+        try {
+            const editId = document.getElementById('usrEditId').value;
+            const rol = document.getElementById('usrRol').value;
+            const idSuc = rol === 'admin_general' ? null : Number(document.getElementById('usrSucursal').value) || null;
+            const d = { nombre: document.getElementById('usrNombre').value.trim(), email: document.getElementById('usrEmail').value.trim(), password: document.getElementById('usrPassword').value, rol, idSucursal: idSuc, estatus: 'activo' };
+            if (editId) await apiUpdate('usuarios', editId, d); else await apiCreate('usuarios', d);
+            showToast(editId ? 'Usuario actualizado' : 'Usuario creado');
+            closeModal('modalUsuario'); loadUsuarios();
+        } catch (e) { showToast('Error: ' + e.message, 'error'); }
+    }
+
+    // ========== REPORTES ==========
+    async function setupReportes() {
+        if (session.rol === 'admin_general') {
+            const sucs = await api('sucursales');
+            document.getElementById('repSucursal').innerHTML = '<option value="">Todas</option>' + sucs.map(s => `<option value="${s.id}">${esc(s.nombre)}</option>`).join('');
+            document.getElementById('repSucursalGroup').style.display = '';
+        } else {
+            document.getElementById('repSucursalGroup').style.display = 'none';
+        }
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('repDesde').value = today.substring(0, 8) + '01';
+        document.getElementById('repHasta').value = today;
+    }
+    async function generarReporte() {
+        try {
+            const desde = document.getElementById('repDesde').value;
+            const hasta = document.getElementById('repHasta').value;
+            const [pagos, ventas, asist] = await Promise.all([api('pagos'), api('ventas'), api('asistencias')]);
+
+            let fp = pagos, fv = ventas, fa = asist;
+            if (desde) { fp = fp.filter(p => p.fecha >= desde); fv = fv.filter(v => v.fecha >= desde); fa = fa.filter(a => (a.fechaHora || '') >= desde); }
+            if (hasta) { fp = fp.filter(p => p.fecha <= hasta); fv = fv.filter(v => v.fecha <= hasta); fa = fa.filter(a => (a.fechaHora || '') <= hasta + 'T99'); }
+
+            const repSuc = (document.getElementById('repSucursal') || {}).value || '';
+            if (repSuc) { fp = fp.filter(p => String(p.idSucursal) === repSuc); fv = fv.filter(v => String(v.idSucursal) === repSuc); fa = fa.filter(a => String(a.idSucursal) === repSuc); }
+
+            const tMem = fp.reduce((s, p) => s + (Number(p.monto) || 0), 0);
+            const tProd = fv.reduce((s, v) => s + (Number(v.total) || 0), 0);
+            const tEf = fp.filter(p => p.metodo === 'efectivo').reduce((s, p) => s + (Number(p.monto) || 0), 0) + fv.filter(v => v.metodo === 'efectivo').reduce((s, v) => s + (Number(v.total) || 0), 0);
+            const tTar = fp.filter(p => p.metodo === 'tarjeta').reduce((s, p) => s + (Number(p.monto) || 0), 0) + fv.filter(v => v.metodo === 'tarjeta').reduce((s, v) => s + (Number(v.total) || 0), 0);
+            const tTrans = fp.filter(p => p.metodo === 'transferencia').reduce((s, p) => s + (Number(p.monto) || 0), 0) + fv.filter(v => v.metodo === 'transferencia').reduce((s, v) => s + (Number(v.total) || 0), 0);
+
+            document.getElementById('reporteResult').innerHTML = `
+                <div class="stats-row" style="margin-bottom:1.5rem">
+                    <div class="stat-card"><div class="stat-icon teal"><i data-lucide="credit-card"></i></div><div class="stat-info"><h3>${fmt$(tMem)}</h3><p>Total Membresias</p></div></div>
+                    <div class="stat-card"><div class="stat-icon blue"><i data-lucide="shopping-bag"></i></div><div class="stat-info"><h3>${fmt$(tProd)}</h3><p>Total Productos</p></div></div>
+                    <div class="stat-card"><div class="stat-icon green"><i data-lucide="banknote"></i></div><div class="stat-info"><h3>${fmt$(tEf)}</h3><p>Efectivo</p></div></div>
+                    <div class="stat-card"><div class="stat-icon orange"><i data-lucide="credit-card"></i></div><div class="stat-info"><h3>${fmt$(tTar)}</h3><p>Tarjeta</p></div></div>
+                    <div class="stat-card"><div class="stat-icon purple"><i data-lucide="arrow-left-right"></i></div><div class="stat-info"><h3>${fmt$(tTrans)}</h3><p>Transferencia</p></div></div>
+                </div>
+                <div class="stats-row">
+                    <div class="stat-card"><div class="stat-icon teal"><i data-lucide="dollar-sign"></i></div><div class="stat-info"><h3>${fmt$(tMem + tProd)}</h3><p>Ingreso Total</p></div></div>
+                    <div class="stat-card"><div class="stat-icon blue"><i data-lucide="receipt"></i></div><div class="stat-info"><h3>${fp.length}</h3><p>Pagos realizados</p></div></div>
+                    <div class="stat-card"><div class="stat-icon green"><i data-lucide="shopping-bag"></i></div><div class="stat-info"><h3>${fv.length}</h3><p>Ventas realizadas</p></div></div>
+                    <div class="stat-card"><div class="stat-icon orange"><i data-lucide="clipboard-check"></i></div><div class="stat-info"><h3>${fa.length}</h3><p>Asistencias</p></div></div>
+                </div>`;
+            lucide.createIcons();
+        } catch (e) { showToast('Error: ' + e.message, 'error'); }
+    }
+
+    // ========== INIT ==========
+    (function init() {
+        session = getSession();
+        if (!session || !session.token) { window.location.href = 'login.html'; return; }
+
+        document.getElementById('userName').textContent = session.nombre;
+        const rolLabels = { admin_general: 'Admin General', admin_sucursal: 'Admin Sucursal', recepcionista: 'Recepcion', kiosko: 'Kiosco' };
+        document.getElementById('userRole').textContent = rolLabels[session.rol] || session.rol;
+        document.getElementById('brandRole').textContent = rolLabels[session.rol] || session.rol;
+        document.getElementById('userAvatar').textContent = (session.nombre || '?')[0].toUpperCase();
+        document.getElementById('badgeSucursal').textContent = session.idSucursal ? 'Sucursal ID: ' + session.idSucursal : 'Todas las sucursales';
+
+        buildSidebar();
+        applyOperacionPermissions();
+        navigateTo('dashboard');
+    })();
+    </script>
+</body>
+</html>
